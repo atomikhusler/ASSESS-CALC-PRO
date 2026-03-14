@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+        // Update this version number string to force a hard reset for all users
+        const APP_VERSION = 'AssessPro_v6'; 
+        
+        if (localStorage.getItem('app_version_tracker') !== APP_VERSION) {
+            console.log("Old version detected. Initiating hard cache wipe...");
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            localStorage.setItem('app_version_tracker', APP_VERSION);
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 500);
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assess Calc Pro</title>
@@ -233,7 +260,7 @@
         </div>
 
         <div class="row-2">
-            <div class="cell"><div class="label">(FA-1 + FA-2 + SA-1)</div><div class="output-box" id="out-rawsum">0</div><div class="sub-label">Max: 100</div></div>
+          <div class="cell"><div class="label">(FA-1 + FA-2 + SA-1)</div><div class="output-box" id="out-rawsum">0</div><div class="sub-label" id="lbl-max-rawsum">Max: 100</div></div>
             <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-t1">0.0</div><div class="sub-label" id="lbl-wt-t1">Wt: 30%</div></div>
         </div>
 
@@ -318,8 +345,9 @@
 </div>
 
 <script>
-    // --- STATE & CONFIGURATION ---
+      // --- STATE & CONFIGURATION ---
     let currentMode = 'pri';
+    let currentModTab = 'pri'; // NEW: Tracks which settings tab you are currently editing
     
     const DEFAULT_CONFIG = {
         theme: 'theme-dark',
@@ -333,14 +361,15 @@
         }
     };
     
-    let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v4')) || DEFAULT_CONFIG;
+    // Bumped to v5 to clear any stuck offline memory
+    let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v5')) || DEFAULT_CONFIG;
 
     function init() {
         document.body.className = cfg.theme;
         document.getElementById('theme-switch').checked = (cfg.theme === 'theme-light');
         updateMetaTheme();
         loadSettingsToUI();
-        updateSubLabels(); // Initialize labels dynamically
+        updateSubLabels(); 
 
         document.querySelectorAll('input[type="number"]').forEach(inp => {
             if(inp.id.startsWith('inp-')) {
@@ -355,13 +384,11 @@
         let m = cfg[currentMode].max;
         let w = cfg[currentMode].wt;
 
-        // Update Max Labels
         document.querySelectorAll('.lbl-max-fa').forEach(el => el.innerText = `Max: ${m.fa}`);
         document.querySelectorAll('.lbl-max-sa').forEach(el => el.innerText = `Max: ${m.sa}`);
         document.querySelectorAll('.lbl-max-wr').forEach(el => el.innerText = `Max: ${m.wr}`);
         document.querySelectorAll('.lbl-max-pr').forEach(el => el.innerText = `Max: ${m.pr}`);
 
-        // Update Weightage Labels
         document.getElementById('lbl-wt-t1').innerText = `Wt: ${w.t1}%`;
         document.getElementById('lbl-wt-wr').innerText = `Wt: ${w.wr}%`;
         document.getElementById('lbl-wt-pr').innerText = `Wt: ${w.pr}%`;
@@ -393,7 +420,6 @@
 
     function setMode(mode) {
         currentMode = mode;
-        // Update Main Screen Toggles
         document.getElementById('btn-pri').classList.toggle('active', mode === 'pri');
         document.getElementById('btn-up').classList.toggle('active', mode === 'up');
         
@@ -402,8 +428,9 @@
         calculate(); 
     }
 
-    // Modal Tab Controller
+    // Modal Tab Controller (Tracks what the user is editing)
     function setModTab(mode) {
+        currentModTab = mode; 
         document.getElementById('mod-btn-pri').classList.toggle('active', mode === 'pri');
         document.getElementById('mod-btn-up').classList.toggle('active', mode === 'up');
         
@@ -479,7 +506,6 @@
             modal.classList.remove('show');
             setTimeout(() => modal.style.display = 'none', 300);
         } else {
-            // Auto-align Modal Tab with Current Mode when opening
             setModTab(currentMode);
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('show'), 10);
@@ -495,11 +521,17 @@
         cfg.up.max  = { fa: getNum('up-m-fa'), sa: getNum('up-m-sa'), wr: getNum('up-m-wr'), pr: getNum('up-m-pr') };
         cfg.up.wt   = { t1: getNum('up-w-t1'), sa: getNum('up-w-sa'), wr: getNum('up-w-wr'), pr: getNum('up-w-pr') };
         
-        localStorage.setItem('assess_calc_pro_v4', JSON.stringify(cfg));
+        localStorage.setItem('assess_calc_pro_v5', JSON.stringify(cfg));
         
-        updateSubLabels();
-        revalidateInputs();
-        calculate(); 
+        // UX UPGRADE: Auto-switch main dashboard to match the settings tab you just edited!
+        if (currentMode !== currentModTab) {
+            setMode(currentModTab);
+        } else {
+            updateSubLabels();
+            revalidateInputs();
+            calculate(); 
+        }
+        
         toggleSettings();
     }
 
@@ -513,7 +545,6 @@
     }
 
     init();
-
 </script>
 </body>
 </html>

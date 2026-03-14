@@ -1,5 +1,5 @@
-const CACHE_NAME = 'calc-pro-v4';
-const ASSETS = [
+var CACHE_NAME = 'calc-pro-v6'; 
+var ASSETS = [
   './',
   './index.html',
   './manifest.json'
@@ -15,7 +15,7 @@ self.addEventListener('activate', e => {
         caches.keys().then(keys => {
             return Promise.all(keys.map(key => {
                 if (key !== CACHE_NAME) {
-                    console.log('Deleting old cache:', key);
+                    console.log('Destroying old cache:', key);
                     return caches.delete(key);
                 }
             }));
@@ -24,15 +24,22 @@ self.addEventListener('activate', e => {
     self.clients.claim();
 });
 
+// 🔥 THE NETWORK-FIRST STRATEGY 🔥
 self.addEventListener('fetch', e => {
     e.respondWith(
-        caches.match(e.request).then(res => 
-            res || fetch(e.request).then(r => {
-                return caches.open(CACHE_NAME).then(cache => { 
-                    cache.put(e.request, r.clone()); 
-                    return r; 
+        fetch(e.request)
+            .then(response => {
+                // If internet is connected, download fresh code and save to cache
+                const resClone = response.clone();
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(e.request, resClone);
                 });
+                return response;
             })
-        ).catch(() => new Response("Offline Mode"))
+            .catch(() => {
+                // If NO internet, fall back to the offline cache
+                console.log('Network failed, serving from cache.');
+                return caches.match(e.request);
+            })
     );
 });
