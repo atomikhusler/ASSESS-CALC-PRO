@@ -378,22 +378,25 @@
             }
         });
     }
-
     // Dynamic Label Updater
     function updateSubLabels() {
         let m = cfg[currentMode].max;
         let w = cfg[currentMode].wt;
 
-        document.querySelectorAll('.lbl-max-fa').forEach(el => el.innerText = `Max: ${m.fa}`);
-        document.querySelectorAll('.lbl-max-sa').forEach(el => el.innerText = `Max: ${m.sa}`);
-        document.querySelectorAll('.lbl-max-wr').forEach(el => el.innerText = `Max: ${m.wr}`);
-        document.querySelectorAll('.lbl-max-pr').forEach(el => el.innerText = `Max: ${m.pr}`);
+        // Update: Max Labels
+        document.querySelectorAll('.lbl-max-fa').forEach(el => el.innerText = `MAX: ${m.fa}`);
+        document.querySelectorAll('.lbl-max-sa').forEach(el => el.innerText = `MAX: ${m.sa}`);
+        document.querySelectorAll('.lbl-max-wr').forEach(el => el.innerText = `MAX: ${m.wr}`);
+        document.querySelectorAll('.lbl-max-pr').forEach(el => el.innerText = `MAX: ${m.pr}`);
+        document.getElementById('lbl-max-rawsum').innerText = `MAX: ${(m.fa * 2) + m.sa}`;
 
-        document.getElementById('lbl-wt-t1').innerText = `Wt: ${w.t1}%`;
-        document.getElementById('lbl-wt-wr').innerText = `Wt: ${w.wr}%`;
-        document.getElementById('lbl-wt-pr').innerText = `Wt: ${w.pr}%`;
-        document.getElementById('lbl-wt-sa').innerText = `Wt: ${w.sa}%`;
+        // Update Weightage Labels
+        document.getElementById('lbl-wt-t1').innerText = `WT: ${w.t1}%`;
+        document.getElementById('lbl-wt-wr').innerText = `WT: ${w.wr}%`;
+        document.getElementById('lbl-wt-pr').innerText = `WT: ${w.pr}%`;
+        document.getElementById('lbl-wt-sa').innerText = `WT: ${w.sa}%`;
     }
+
 
     function loadSettingsToUI() {
         const setVal = (id, val) => document.getElementById(id).value = val;
