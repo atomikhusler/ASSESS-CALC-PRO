@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Assess Calc Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <style>
+        /* --- PREMIUM DUAL-THEME ENGINE --- */
+        :root {
+            /* OBSIDIAN (Dark Mode - Default) */
+            --bg-color: #050505;
+            --mesh-1: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%);
+            --mesh-2: radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.25) 0px, transparent 50%);
+            
+            --glass-bg: rgba(20, 25, 35, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-highlight: rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --input-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+            --input-focus: rgba(14, 165, 233, 0.1);
+            --input-border: rgba(255, 255, 255, 0.1);
+            
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: 0 0 15px rgba(56, 189, 248, 0.4);
+            
+            --total-bg: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.2));
+            --total-border: rgba(56, 189, 248, 0.5);
+            --brand-grad: linear-gradient(135deg, #38bdf8, #818cf8);
+        }
+
+        body.theme-light {
+            /* OPAL (Light Mode) */
+            --bg-color: #f0f4f8;
+            --mesh-1: radial-gradient(at 0% 0%, rgba(167, 139, 250, 0.3) 0px, transparent 50%);
+            --mesh-2: radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.3) 0px, transparent 50%);
+            
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 1);
+            --glass-highlight: rgba(255, 255, 255, 0.8);
+            --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
+            
+            --input-bg: rgba(241, 245, 249, 0.5);
+            --input-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            --input-focus: rgba(255, 255, 255, 0.9);
+            --input-border: rgba(203, 213, 225, 0.6);
+            
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+            --accent-glow: none;
+            
+            --total-bg: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(99, 102, 241, 0.1));
+            --total-border: rgba(2, 132, 199, 0.3);
+            --brand-grad: linear-gradient(135deg, #0284c7, #4f46e5);
+        }
+
+        /* --- BASE STYLES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-color);
+            background-image: var(--mesh-1), var(--mesh-2);
+            color: var(--text-main); min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 16px 12px; transition: all 0.4s ease;
+        }
+
+        .dashboard {
+            width: 100%; max-width: 500px;
+            display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 10;
+        }
+
+        /* --- HEADER --- */
+        .header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        
+        .btn-icon {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 50%; width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: var(--text-main); cursor: pointer;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--glass-shadow); transition: transform 0.15s;
+        }
+        .btn-icon:active { transform: scale(0.9); }
+
+        .toggle-group {
+            display: flex; background: var(--input-bg);
+            border-radius: 12px; padding: 4px; border: 1px solid var(--glass-border);
+            box-shadow: var(--input-shadow);
+        }
+        .toggle-group button {
+            padding: 8px 16px; border: none; background: transparent;
+            color: var(--text-muted); font-weight: 700; font-size: 13px;
+            border-radius: 8px; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-group button.active {
+            background: var(--glass-highlight); color: var(--text-main);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); border: 1px solid var(--glass-border);
+        }
+
+        .btn-clear {
+            background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4);
+            color: #f43f5e; font-weight: 800; font-size: 13px; text-transform: uppercase;
+            padding: 0 16px; border-radius: 14px; height: 44px; cursor: pointer;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: 0.15s;
+        }
+        .btn-clear:active { transform: scale(0.95); background: rgba(244, 63, 94, 0.3); }
+
+        /* --- THE GLASS PANEL --- */
+        .glass-panel {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 28px; padding: 24px 16px;
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(30px) saturate(120%); -webkit-backdrop-filter: blur(30px) saturate(120%);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        /* --- GRID STRUCTURE --- */
+        .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .row-4-tight { display: grid; grid-template-columns: 1.3fr 0.7fr 1.3fr 0.7fr; gap: 6px; align-items: end; }
+        .row-bottom { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; align-items: end; }
+
+        .cell { display: flex; flex-direction: column; gap: 8px; }
+        
+        .label { 
+            font-size: 9.5px; font-weight: 800; color: var(--text-muted); 
+            text-transform: uppercase; text-align: center; letter-spacing: 0.5px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* --- INPUTS & OUTPUTS --- */
+        input[type="number"], .output-box {
+            width: 100%; height: 50px;
+            border-radius: 14px; font-size: 20px; font-weight: 800;
+            text-align: center; display: flex; align-items: center; justify-content: center;
+        }
+
+        input[type="number"] {
+            background: var(--input-bg); border: 1px solid var(--input-border);
+            color: var(--text-main); box-shadow: var(--input-shadow);
+            transition: 0.2s; -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"]:focus { background: var(--input-focus); border-color: var(--accent); box-shadow: var(--accent-glow); }
+        input[type="number"].error { border-color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
+
+        .output-box {
+            background: transparent; border: 1px dashed var(--glass-border);
+            color: var(--accent); font-size: 18px; text-shadow: var(--accent-glow);
+        }
+
+        /* The Big Final Score */
+        .output-total {
+            background: var(--total-bg); border: 1px solid var(--total-border);
+            color: var(--text-main); font-size: 28px; height: 58px;
+            box-shadow: var(--accent-glow);
+        }
+
+        .divider { border: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--glass-border), transparent); margin: 2px 0; }
+
+        /* --- FLAGSHIP BRANDING --- */
+        .branding { text-align: center; margin-top: 24px; padding-bottom: 20px;}
+        .brand-title {
+            background: var(--brand-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 18px; font-weight: 900; letter-spacing: 4px; margin-bottom: 4px;
+        }
+        .brand-sub { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+
+        /* --- SETTINGS MODAL --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 20px; opacity: 0; transition: opacity 0.3s; }
+        .modal.show { opacity: 1; }
+        .modal-content { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(30px) saturate(150%); border-radius: 28px; width: 100%; max-width: 400px; padding: 28px; box-shadow: var(--glass-shadow); transform: scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal.show .modal-content { transform: scale(1); }
+        
+        .modal h2 { margin-bottom: 24px; font-size: 22px; text-align: center; font-weight: 800; }
+        .theme-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--glass-border); }
+        
+        .modal .btn-save { width: 100%; padding: 16px; background: var(--text-main); color: var(--bg-color); font-weight: 800; font-size: 15px; border: none; border-radius: 14px; margin-top: 24px; cursor: pointer; transition: 0.2s; }
+        .modal .btn-save:active { transform: scale(0.96); }
+        
+        /* Switch */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--input-bg); border: 1px solid var(--input-border); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: var(--text-main); transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(22px); background-color: #fff; }
+
+    </style>
+</head>
+<body class="theme-dark">
+
+<div class="dashboard">
+    <div class="header">
+        <button class="btn-icon" onclick="toggleSettings()">⚙️</button>
+        <div class="toggle-group">
+            <button id="btn-pri" class="active" onclick="setMode('pri')">Primary</button>
+            <button id="btn-up" onclick="setMode('up')">U.Primary</button>
+        </div>
+        <button class="btn-clear" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <div class="glass-panel">
+        
+        <div class="row-3">
+            <div class="cell"><div class="label">FA-1</div><input type="number" id="inp-fa1" inputmode="decimal" data-max="fa"></div>
+            <div class="cell"><div class="label">FA-2</div><input type="number" id="inp-fa2" inputmode="decimal" data-max="fa"></div>
+            <div class="cell"><div class="label">SA-1</div><input type="number" id="inp-sa1" inputmode="decimal" data-max="sa"></div>
+        </div>
+
+        <div class="row-2">
+            <div class="cell"><div class="label">(FA-1 + FA-2 + SA-1)</div><div class="output-box" id="out-rawsum">0</div></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-t1">0.0</div></div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="row-4-tight">
+            <div class="cell"><div class="label">Best Written</div><input type="number" id="inp-wr" inputmode="decimal" data-max="wr"></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-wr">0.0</div></div>
+            <div class="cell"><div class="label">Best Project</div><input type="number" id="inp-pr" inputmode="decimal" data-max="pr"></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-pr">0.0</div></div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="row-bottom">
+            <div class="cell"><div class="label">Annual / SA-2</div><input type="number" id="inp-sa2" inputmode="decimal" data-max="sa"></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-sa2">0.0</div></div>
+            <div class="cell"><div class="label" style="color:var(--text-main);">Total Score</div><div class="output-box output-total" id="out-final">0</div></div>
+        </div>
+
+    </div>
+
+    <div class="branding">
+        <div class="brand-title">ASSESS CALC PRO</div>
+        <div class="brand-sub">Developed by Sahil Kumar Rout</div>
+    </div>
+</div>
+
+<div class="modal" id="mod-set">
+    <div class="modal-content">
+        <h2>Configuration</h2>
+        
+        <div class="theme-toggle-row">
+            <span style="font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Light Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="row-2" style="margin-bottom: 12px;">
+            <div class="cell"><div class="label">FA Max Mark</div><input type="number" id="cfg-fa"></div>
+            <div class="cell"><div class="label">SA Max Mark</div><input type="number" id="cfg-sa"></div>
+        </div>
+        <div class="row-2">
+            <div class="cell"><div class="label">Written Max</div><input type="number" id="cfg-wr"></div>
+            <div class="cell"><div class="label">Project Max</div><input type="number" id="cfg-pr"></div>
+        </div>
+        <button class="btn-save" onclick="saveSettings()">Save & Close</button>
+    </div>
+</div>
+
+<script>
+    // --- STATE & CONFIGURATION ---
+    let currentMode = 'pri';
+    
+    const DEFAULT_CONFIG = {
+        theme: 'theme-dark',
+        max: { fa: 25, sa: 50, wr: 10, pr: 20 },
+        wt: {
+            pri: { t1: 30, wr: 10, pr: 20, sa: 40 },
+            up:  { t1: 30, wr: 5,  pr: 15, sa: 50 }
+        }
+    };
+    
+    let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v2')) || DEFAULT_CONFIG;
+
+    function init() {
+        // Load Theme
+        document.body.className = cfg.theme;
+        document.getElementById('theme-switch').checked = (cfg.theme === 'theme-light');
+        updateMetaTheme();
+
+        // Load Config
+        document.getElementById('cfg-fa').value = cfg.max.fa;
+        document.getElementById('cfg-sa').value = cfg.max.sa;
+        document.getElementById('cfg-wr').value = cfg.max.wr;
+        document.getElementById('cfg-pr').value = cfg.max.pr;
+
+        // Attach Listeners
+        document.querySelectorAll('input[type="number"]').forEach(inp => {
+            if(inp.id.startsWith('inp-')) {
+                inp.addEventListener('input', handleInput);
+                inp.addEventListener('focus', function() { if(this.value === '0') this.value = ''; });
+            }
+        });
+    }
+
+    function toggleTheme() {
+        let isLight = document.getElementById('theme-switch').checked;
+        cfg.theme = isLight ? 'theme-light' : 'theme-dark';
+        document.body.className = cfg.theme;
+        updateMetaTheme();
+    }
+
+    function updateMetaTheme() {
+        let meta = document.querySelector('meta[name="theme-color"]');
+        meta.setAttribute("content", cfg.theme === 'theme-light' ? "#f0f4f8" : "#050505");
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-pri').classList.toggle('active', mode === 'pri');
+        document.getElementById('btn-up').classList.toggle('active', mode === 'up');
+        calculate(); 
+    }
+
+    function handleInput(e) {
+        let el = e.target;
+        let type = el.getAttribute('data-max');
+        let maxLimit = cfg.max[type];
+        
+        let val = parseFloat(el.value);
+        if (!isNaN(val) && val > maxLimit) {
+            el.value = maxLimit; 
+            el.classList.add('error');
+            setTimeout(() => el.classList.remove('error'), 300);
+        }
+        calculate();
+    }
+
+    function calculate() {
+        const getVal = id => { let v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
+        const setTxt = (id, val) => document.getElementById(id).innerText = val;
+
+        let fa1 = getVal('inp-fa1'), fa2 = getVal('inp-fa2'), sa1 = getVal('inp-sa1');
+        let wr = getVal('inp-wr'), pr = getVal('inp-pr'), sa2 = getVal('inp-sa2');
+
+        let weight = cfg.wt[currentMode];
+        let m = cfg.max;
+
+        // Raw Sum
+        let rawSum = fa1 + fa2 + sa1;
+        setTxt('out-rawsum', rawSum);
+
+        // Term 1
+        let maxT1 = (m.fa * 2) + m.sa;
+        let t1Score = maxT1 > 0 ? (rawSum / maxT1) * weight.t1 : 0;
+        setTxt('out-t1', t1Score.toFixed(1));
+
+        // Assessments
+        let wrScore = m.wr > 0 ? (wr / m.wr) * weight.wr : 0;
+        let prScore = m.pr > 0 ? (pr / m.pr) * weight.pr : 0;
+        setTxt('out-wr', wrScore.toFixed(1));
+        setTxt('out-pr', prScore.toFixed(1));
+
+        // SA-2
+        let sa2Score = m.sa > 0 ? (sa2 / m.sa) * weight.sa : 0;
+        setTxt('out-sa2', sa2Score.toFixed(1));
+
+        // Final Math
+        let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
+        setTxt('out-final', grandTotal);
+    }
+
+    function clearAll() {
+        document.querySelectorAll('input[id^="inp-"]').forEach(inp => inp.value = '');
+        calculate();
+        document.getElementById('inp-fa1').focus();
+    }
+
+    function toggleSettings() {
+        let modal = document.getElementById('mod-set');
+        if (modal.style.display === 'flex') {
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        } else {
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+    }
+
+    function saveSettings() {
+        const getNum = id => Math.max(0, parseInt(document.getElementById(id).value) || 0);
+        cfg.max.fa = getNum('cfg-fa');
+        cfg.max.sa = getNum('cfg-sa');
+        cfg.max.wr = getNum('cfg-wr');
+        cfg.max.pr = getNum('cfg-pr');
+        
+        localStorage.setItem('assess_calc_pro_v2', JSON.stringify(cfg));
+        calculate(); 
+        toggleSettings();
+    }
+
+    // --- INLINE SERVICE WORKER (PWA) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const swScript = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('activate', e => self.clients.claim());
+                self.addEventListener('fetch', e => {
+                    e.respondWith(caches.match(e.request).then(res => res || fetch(e.request).then(r => {
+                        return caches.open('calc-pro-v2').then(cache => { cache.put(e.request, r.clone()); return r; });
+                    })).catch(() => new Response("Offline Mode")));
+                });
+            `;
+            const blob = new Blob([swScript], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(console.error);
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
