@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calc-pro-v2';
+const CACHE_NAME = 'calc-pro-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,16 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
+    e.waitUntil(
+        caches.keys().then(keys => {
+            return Promise.all(keys.map(key => {
+                if (key !== CACHE_NAME) {
+                    console.log('Deleting old cache:', key);
+                    return caches.delete(key);
+                }
+            }));
+        })
+    );
     self.clients.claim();
 });
 

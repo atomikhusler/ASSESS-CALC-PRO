@@ -76,7 +76,7 @@
             display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 10;
         }
 
-        /* --- HEADER --- */
+        /* --- HEADER & HIGH-VISIBILITY TOGGLES --- */
         .header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         
         .btn-icon {
@@ -96,12 +96,14 @@
         }
         .toggle-group button {
             padding: 8px 16px; border: none; background: transparent;
-            color: var(--text-muted); font-weight: 700; font-size: 13px;
-            border-radius: 8px; cursor: pointer; transition: 0.3s;
+            color: var(--text-muted); font-weight: 800; font-size: 13px;
+            border-radius: 8px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        /* HIGH VISIBILITY ACTIVE STATE */
         .toggle-group button.active {
-            background: var(--glass-highlight); color: var(--text-main);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); border: 1px solid var(--glass-border);
+            background: var(--accent); color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .btn-clear {
@@ -126,22 +128,29 @@
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .row-4-tight { display: grid; grid-template-columns: 1.3fr 0.7fr 1.3fr 0.7fr; gap: 6px; align-items: end; }
         .row-bottom { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; align-items: end; }
+        
+        /* Modal internal grid */
+        .row-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
 
-        .cell { display: flex; flex-direction: column; gap: 8px; }
+        .cell { display: flex; flex-direction: column; gap: 5px; }
         
         .label { 
-            /* Responsive size: min 9px, scales with screen, max 11.5px */
-            font-size: clamp(9px, 2.5vw, 11.5px); 
+            font-size: clamp(9px, 2.5vw, 11px); 
             font-weight: 800; color: var(--text-muted); 
             text-transform: uppercase; text-align: center; letter-spacing: 0.5px;
-            /* Allow text to wrap nicely to multiple lines */
             white-space: normal; line-height: 1.2; 
         }
 
-        /* New class specifically for the larger headings you requested */
         .label-large {
             font-size: clamp(12px, 3.5vw, 14px);
-            color: var(--text-main); /* Brighter color to make them stand out */
+            color: var(--text-main); 
+        }
+
+        /* DYNAMIC SUB-LABELS (Max Marks / Weightage) */
+        .sub-label {
+            font-size: 9.5px; font-weight: 800; color: var(--accent);
+            text-align: center; text-transform: uppercase; letter-spacing: 0.5px;
+            opacity: 0.9; margin-top: 1px;
         }
 
         /* --- INPUTS & OUTPUTS --- */
@@ -188,19 +197,18 @@
         .modal-content { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(30px) saturate(150%); border-radius: 28px; width: 100%; max-width: 400px; padding: 28px; box-shadow: var(--glass-shadow); transform: scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal.show .modal-content { transform: scale(1); }
         
-        .modal h2 { margin-bottom: 24px; font-size: 22px; text-align: center; font-weight: 800; }
-        .theme-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--glass-border); }
+        .modal h2 { margin-bottom: 20px; font-size: 22px; text-align: center; font-weight: 800; }
+        .theme-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); }
         
-        .modal .btn-save { width: 100%; padding: 16px; background: var(--text-main); color: var(--bg-color); font-weight: 800; font-size: 15px; border: none; border-radius: 14px; margin-top: 24px; cursor: pointer; transition: 0.2s; }
+        .settings-section { display: none; animation: fadeIn 0.3s ease; }
+        .settings-section.active { display: block; }
+        
+        .section-title { font-size: 12px; color: var(--text-main); border-bottom: 1px solid var(--glass-border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+
+        .modal .btn-save { width: 100%; padding: 16px; background: var(--text-main); color: var(--bg-color); font-weight: 800; font-size: 15px; border: none; border-radius: 14px; margin-top: 10px; cursor: pointer; transition: 0.2s; }
         .modal .btn-save:active { transform: scale(0.96); }
-        
-        /* Switch */
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--input-bg); border: 1px solid var(--input-border); transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: var(--text-main); transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(22px); background-color: #fff; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
     </style>
 </head>
@@ -218,32 +226,32 @@
 
     <div class="glass-panel">
       
-                <div class="row-3">
-            <div class="cell"><div class="label label-large">FA-1</div><input type="number" id="inp-fa1" inputmode="decimal" data-max="fa"></div>
-            <div class="cell"><div class="label label-large">FA-2</div><input type="number" id="inp-fa2" inputmode="decimal" data-max="fa"></div>
-            <div class="cell"><div class="label label-large">SA-1</div><input type="number" id="inp-sa1" inputmode="decimal" data-max="sa"></div>
+        <div class="row-3">
+            <div class="cell"><div class="label label-large">FA-1</div><input type="number" id="inp-fa1" inputmode="decimal" data-max="fa"><div class="sub-label lbl-max-fa">Max: 25</div></div>
+            <div class="cell"><div class="label label-large">FA-2</div><input type="number" id="inp-fa2" inputmode="decimal" data-max="fa"><div class="sub-label lbl-max-fa">Max: 25</div></div>
+            <div class="cell"><div class="label label-large">SA-1</div><input type="number" id="inp-sa1" inputmode="decimal" data-max="sa"><div class="sub-label lbl-max-sa">Max: 50</div></div>
         </div>
 
         <div class="row-2">
-            <div class="cell"><div class="label">(FA-1 + FA-2 + SA-1)</div><div class="output-box" id="out-rawsum">0</div></div>
-            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-t1">0.0</div></div>
+            <div class="cell"><div class="label">(FA-1 + FA-2 + SA-1)</div><div class="output-box" id="out-rawsum">0</div><div class="sub-label">Max: 100</div></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-t1">0.0</div><div class="sub-label" id="lbl-wt-t1">Wt: 30%</div></div>
         </div>
 
         <hr class="divider">
 
         <div class="row-4-tight">
-            <div class="cell"><div class="label">Best Written</div><input type="number" id="inp-wr" inputmode="decimal" data-max="wr"></div>
-            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-wr">0.0</div></div>
-            <div class="cell"><div class="label"> Best Project</div><input type="number" id="inp-pr" inputmode="decimal" data-max="pr"></div>
-            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-pr">0.0</div></div>
+            <div class="cell"><div class="label">Best Written</div><input type="number" id="inp-wr" inputmode="decimal" data-max="wr"><div class="sub-label lbl-max-wr">Max: 10</div></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-wr">0.0</div><div class="sub-label" id="lbl-wt-wr">Wt: 10%</div></div>
+            <div class="cell"><div class="label">Best Project</div><input type="number" id="inp-pr" inputmode="decimal" data-max="pr"><div class="sub-label lbl-max-pr">Max: 20</div></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-pr">0.0</div><div class="sub-label" id="lbl-wt-pr">Wt: 20%</div></div>
         </div>
 
         <hr class="divider">
 
         <div class="row-bottom">
-            <div class="cell"><div class="label label-large">Annual / SA-2</div><input type="number" id="inp-sa2" inputmode="decimal" data-max="sa"></div>
-            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-sa2">0.0</div></div>
-            <div class="cell"><div class="label" style="color:var(--text-main);">Total Score</div><div class="output-box output-total" id="out-final">0</div></div>
+            <div class="cell"><div class="label label-large">Annual / SA-2</div><input type="number" id="inp-sa2" inputmode="decimal" data-max="sa"><div class="sub-label lbl-max-sa">Max: 50</div></div>
+            <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-sa2">0.0</div><div class="sub-label" id="lbl-wt-sa">Wt: 40%</div></div>
+            <div class="cell"><div class="label" style="color:var(--text-main);">Total Score</div><div class="output-box output-total" id="out-final">0</div><div class="sub-label" style="color:var(--text-main);">Out of 100%</div></div>
         </div>
 
     </div>
@@ -255,7 +263,7 @@
 </div>
 
 <div class="modal" id="mod-set">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
         <h2>Configuration</h2>
         
         <div class="theme-toggle-row">
@@ -266,14 +274,45 @@
             </label>
         </div>
 
-        <div class="row-2" style="margin-bottom: 12px;">
-            <div class="cell"><div class="label">FA Max Mark</div><input type="number" id="cfg-fa"></div>
-            <div class="cell"><div class="label">SA Max Mark</div><input type="number" id="cfg-sa"></div>
+        <div class="toggle-group" style="margin: 0 auto 20px auto; justify-content: center;">
+            <button id="mod-btn-pri" class="active" onclick="setModTab('pri')">Primary Settings</button>
+            <button id="mod-btn-up" onclick="setModTab('up')">U.Primary Settings</button>
         </div>
-        <div class="row-2">
-            <div class="cell"><div class="label">Written Max</div><input type="number" id="cfg-wr"></div>
-            <div class="cell"><div class="label">Project Max</div><input type="number" id="cfg-pr"></div>
+
+        <div id="mod-sec-pri" class="settings-section active">
+            <h3 class="section-title">Maximum Marks</h3>
+            <div class="row-4-grid">
+                <div class="cell"><div class="label">FA</div><input type="number" id="pri-m-fa"></div>
+                <div class="cell"><div class="label">SA</div><input type="number" id="pri-m-sa"></div>
+                <div class="cell"><div class="label">Written</div><input type="number" id="pri-m-wr"></div>
+                <div class="cell"><div class="label">Project</div><input type="number" id="pri-m-pr"></div>
+            </div>
+            <h3 class="section-title">Weightage (%)</h3>
+            <div class="row-4-grid">
+                <div class="cell"><div class="label">Term 1</div><input type="number" id="pri-w-t1"></div>
+                <div class="cell"><div class="label">SA-2</div><input type="number" id="pri-w-sa"></div>
+                <div class="cell"><div class="label">Written</div><input type="number" id="pri-w-wr"></div>
+                <div class="cell"><div class="label">Project</div><input type="number" id="pri-w-pr"></div>
+            </div>
         </div>
+
+        <div id="mod-sec-up" class="settings-section">
+            <h3 class="section-title">Maximum Marks</h3>
+            <div class="row-4-grid">
+                <div class="cell"><div class="label">FA</div><input type="number" id="up-m-fa"></div>
+                <div class="cell"><div class="label">SA</div><input type="number" id="up-m-sa"></div>
+                <div class="cell"><div class="label">Written</div><input type="number" id="up-m-wr"></div>
+                <div class="cell"><div class="label">Project</div><input type="number" id="up-m-pr"></div>
+            </div>
+            <h3 class="section-title">Weightage (%)</h3>
+            <div class="row-4-grid">
+                <div class="cell"><div class="label">Term 1</div><input type="number" id="up-w-t1"></div>
+                <div class="cell"><div class="label">SA-2</div><input type="number" id="up-w-sa"></div>
+                <div class="cell"><div class="label">Written</div><input type="number" id="up-w-wr"></div>
+                <div class="cell"><div class="label">Project</div><input type="number" id="up-w-pr"></div>
+            </div>
+        </div>
+
         <button class="btn-save" onclick="saveSettings()">Save &amp; Close</button>
     </div>
 </div>
@@ -284,28 +323,25 @@
     
     const DEFAULT_CONFIG = {
         theme: 'theme-dark',
-        max: { fa: 25, sa: 50, wr: 10, pr: 20 },
-        wt: {
-            pri: { t1: 30, wr: 10, pr: 20, sa: 40 },
-            up:  { t1: 30, wr: 5,  pr: 15, sa: 50 }
+        pri: {
+            max: { fa: 25, sa: 50, wr: 10, pr: 20 },
+            wt:  { t1: 30, sa: 40, wr: 10, pr: 20 }
+        },
+        up: {
+            max: { fa: 25, sa: 50, wr: 5, pr: 15 },
+            wt:  { t1: 30, sa: 50, wr: 5, pr: 15 }
         }
     };
     
-    let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v2')) || DEFAULT_CONFIG;
+    let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v4')) || DEFAULT_CONFIG;
 
     function init() {
-        // Load Theme
         document.body.className = cfg.theme;
         document.getElementById('theme-switch').checked = (cfg.theme === 'theme-light');
         updateMetaTheme();
+        loadSettingsToUI();
+        updateSubLabels(); // Initialize labels dynamically
 
-        // Load Config
-        document.getElementById('cfg-fa').value = cfg.max.fa;
-        document.getElementById('cfg-sa').value = cfg.max.sa;
-        document.getElementById('cfg-wr').value = cfg.max.wr;
-        document.getElementById('cfg-pr').value = cfg.max.pr;
-
-        // Attach Listeners
         document.querySelectorAll('input[type="number"]').forEach(inp => {
             if(inp.id.startsWith('inp-')) {
                 inp.addEventListener('input', handleInput);
@@ -314,29 +350,84 @@
         });
     }
 
+    // Dynamic Label Updater
+    function updateSubLabels() {
+        let m = cfg[currentMode].max;
+        let w = cfg[currentMode].wt;
+
+        // Update Max Labels
+        document.querySelectorAll('.lbl-max-fa').forEach(el => el.innerText = `Max: ${m.fa}`);
+        document.querySelectorAll('.lbl-max-sa').forEach(el => el.innerText = `Max: ${m.sa}`);
+        document.querySelectorAll('.lbl-max-wr').forEach(el => el.innerText = `Max: ${m.wr}`);
+        document.querySelectorAll('.lbl-max-pr').forEach(el => el.innerText = `Max: ${m.pr}`);
+
+        // Update Weightage Labels
+        document.getElementById('lbl-wt-t1').innerText = `Wt: ${w.t1}%`;
+        document.getElementById('lbl-wt-wr').innerText = `Wt: ${w.wr}%`;
+        document.getElementById('lbl-wt-pr').innerText = `Wt: ${w.pr}%`;
+        document.getElementById('lbl-wt-sa').innerText = `Wt: ${w.sa}%`;
+    }
+
+    function loadSettingsToUI() {
+        const setVal = (id, val) => document.getElementById(id).value = val;
+        setVal('pri-m-fa', cfg.pri.max.fa); setVal('pri-m-sa', cfg.pri.max.sa);
+        setVal('pri-m-wr', cfg.pri.max.wr); setVal('pri-m-pr', cfg.pri.max.pr);
+        setVal('pri-w-t1', cfg.pri.wt.t1);  setVal('pri-w-sa', cfg.pri.wt.sa);
+        setVal('pri-w-wr', cfg.pri.wt.wr);  setVal('pri-w-pr', cfg.pri.wt.pr);
+        
+        setVal('up-m-fa', cfg.up.max.fa); setVal('up-m-sa', cfg.up.max.sa);
+        setVal('up-m-wr', cfg.up.max.wr); setVal('up-m-pr', cfg.up.max.pr);
+        setVal('up-w-t1', cfg.up.wt.t1);  setVal('up-w-sa', cfg.up.wt.sa);
+        setVal('up-w-wr', cfg.up.wt.wr);  setVal('up-w-pr', cfg.up.wt.pr);
+    }
+
     function toggleTheme() {
-        let isLight = document.getElementById('theme-switch').checked;
-        cfg.theme = isLight ? 'theme-light' : 'theme-dark';
+        cfg.theme = document.getElementById('theme-switch').checked ? 'theme-light' : 'theme-dark';
         document.body.className = cfg.theme;
         updateMetaTheme();
     }
 
     function updateMetaTheme() {
-        let meta = document.querySelector('meta[name="theme-color"]');
-        meta.setAttribute("content", cfg.theme === 'theme-light' ? "#f0f4f8" : "#050505");
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", cfg.theme === 'theme-light' ? "#f0f4f8" : "#050505");
     }
 
     function setMode(mode) {
         currentMode = mode;
+        // Update Main Screen Toggles
         document.getElementById('btn-pri').classList.toggle('active', mode === 'pri');
         document.getElementById('btn-up').classList.toggle('active', mode === 'up');
+        
+        updateSubLabels();
+        revalidateInputs();
         calculate(); 
+    }
+
+    // Modal Tab Controller
+    function setModTab(mode) {
+        document.getElementById('mod-btn-pri').classList.toggle('active', mode === 'pri');
+        document.getElementById('mod-btn-up').classList.toggle('active', mode === 'up');
+        
+        document.getElementById('mod-sec-pri').classList.toggle('active', mode === 'pri');
+        document.getElementById('mod-sec-up').classList.toggle('active', mode === 'up');
+    }
+
+    function revalidateInputs() {
+        document.querySelectorAll('input[id^="inp-"]').forEach(inp => {
+            let type = inp.getAttribute('data-max');
+            let maxLimit = cfg[currentMode].max[type];
+            let val = parseFloat(inp.value);
+            if (!isNaN(val) && val > maxLimit) {
+                inp.value = maxLimit; 
+                inp.classList.add('error');
+                setTimeout(() => inp.classList.remove('error'), 300);
+            }
+        });
     }
 
     function handleInput(e) {
         let el = e.target;
         let type = el.getAttribute('data-max');
-        let maxLimit = cfg.max[type];
+        let maxLimit = cfg[currentMode].max[type]; 
         
         let val = parseFloat(el.value);
         if (!isNaN(val) && val > maxLimit) {
@@ -354,29 +445,24 @@
         let fa1 = getVal('inp-fa1'), fa2 = getVal('inp-fa2'), sa1 = getVal('inp-sa1');
         let wr = getVal('inp-wr'), pr = getVal('inp-pr'), sa2 = getVal('inp-sa2');
 
-        let weight = cfg.wt[currentMode];
-        let m = cfg.max;
+        let m = cfg[currentMode].max;
+        let w = cfg[currentMode].wt;
 
-        // Raw Sum
         let rawSum = fa1 + fa2 + sa1;
         setTxt('out-rawsum', rawSum);
 
-        // Term 1
         let maxT1 = (m.fa * 2) + m.sa;
-        let t1Score = maxT1 > 0 ? (rawSum / maxT1) * weight.t1 : 0;
+        let t1Score = maxT1 > 0 ? (rawSum / maxT1) * w.t1 : 0;
         setTxt('out-t1', t1Score.toFixed(1));
 
-        // Assessments
-        let wrScore = m.wr > 0 ? (wr / m.wr) * weight.wr : 0;
-        let prScore = m.pr > 0 ? (pr / m.pr) * weight.pr : 0;
+        let wrScore = m.wr > 0 ? (wr / m.wr) * w.wr : 0;
+        let prScore = m.pr > 0 ? (pr / m.pr) * w.pr : 0;
         setTxt('out-wr', wrScore.toFixed(1));
         setTxt('out-pr', prScore.toFixed(1));
 
-        // SA-2
-        let sa2Score = m.sa > 0 ? (sa2 / m.sa) * weight.sa : 0;
+        let sa2Score = m.sa > 0 ? (sa2 / m.sa) * w.sa : 0;
         setTxt('out-sa2', sa2Score.toFixed(1));
 
-        // Final Math
         let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
         setTxt('out-final', grandTotal);
     }
@@ -393,19 +479,26 @@
             modal.classList.remove('show');
             setTimeout(() => modal.style.display = 'none', 300);
         } else {
+            // Auto-align Modal Tab with Current Mode when opening
+            setModTab(currentMode);
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('show'), 10);
         }
     }
 
     function saveSettings() {
-        const getNum = id => Math.max(0, parseInt(document.getElementById(id).value) || 0);
-        cfg.max.fa = getNum('cfg-fa');
-        cfg.max.sa = getNum('cfg-sa');
-        cfg.max.wr = getNum('cfg-wr');
-        cfg.max.pr = getNum('cfg-pr');
+        const getNum = id => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
         
-        localStorage.setItem('assess_calc_pro_v2', JSON.stringify(cfg));
+        cfg.pri.max = { fa: getNum('pri-m-fa'), sa: getNum('pri-m-sa'), wr: getNum('pri-m-wr'), pr: getNum('pri-m-pr') };
+        cfg.pri.wt  = { t1: getNum('pri-w-t1'), sa: getNum('pri-w-sa'), wr: getNum('pri-w-wr'), pr: getNum('pri-w-pr') };
+        
+        cfg.up.max  = { fa: getNum('up-m-fa'), sa: getNum('up-m-sa'), wr: getNum('up-m-wr'), pr: getNum('up-m-pr') };
+        cfg.up.wt   = { t1: getNum('up-w-t1'), sa: getNum('up-w-sa'), wr: getNum('up-w-wr'), pr: getNum('up-w-pr') };
+        
+        localStorage.setItem('assess_calc_pro_v4', JSON.stringify(cfg));
+        
+        updateSubLabels();
+        revalidateInputs();
         calculate(); 
         toggleSettings();
     }
