@@ -55,7 +55,7 @@ As a Progressive Web App, installation bypasses traditional app stores for frict
 
 ### 👨‍💻 Architected By
 
-**Ashok Kumar Behera**
+**Sahil Kumar Rout**
 *Primary School Teacher & Independent Developer | Odisha, India*
 
 *Crafting elegant software solutions for the modern classroom.*
