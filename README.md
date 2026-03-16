@@ -50,6 +50,28 @@ As a Progressive Web App, installation bypasses traditional app stores for frict
 3. Launch directly from the device app drawer as a native, standalone application.
 
 ---
+# Assess Calc Pro v7.0 - "The Fluid Update"
+
+This major update transforms Assess Calc Pro from a static utility into a premium, highly responsive Progressive Web App (PWA) tailored for continuous assessment tracking.
+
+## ✨ New Features
+* **Fluid Canvas Engine:** The background now features a dynamic, glassmorphic mesh gradient that shifts colors in real-time based on the student's *Live Performance Percentage*, aligning with OCF-SE 2025 grading standards.
+* **Persistent Multi-Mode Memory:** Primary and Upper Primary modes now have independent data states. Switching between modes instantly loads the specific data for that section without losing progress.
+* **Auto-Save:** Every keystroke is immediately saved to local storage. Accidental tab closures or page refreshes no longer result in lost marks.
+* **Global "Clear All":** Upgraded the clear button to wipe memory globally across all modes and reset the fluid canvas to a calm, neutral state.
+
+## 🎨 UI & Design Enhancements
+* **Premium Glassmorphism:** Upgraded the main calculator panel with a heavy `40px` frosted blur and dynamic border-glow effects.
+* **Frosted Sky (Light Mode):** Completely overhauled Light Theme with better contrast, removing washed-out UI elements in favor of crisp, 10% opacity pastel tints.
+* **Obsidian (Dark Mode):** Refined neon glowing effects to prevent "text smudging," ensuring numbers remain razor-sharp for high-readability.
+* **Error Animations:** Added a premium CSS "shake" animation and red flash when a user attempts to enter marks exceeding the maximum limit.
+
+## 🛠️ Under the Hood & Bug Fixes
+* **Network-First Service Worker:** Upgraded the PWA offline cache (`calc-pro-v7-fluid`) with a forced-reset script to guarantee users instantly receive the latest updates without getting stuck in cache loops.
+* **Mathematical Safeguards:** * Clamped inputs to prevent negative mark entries.
+  * Added `NaN` safety checks to prevent the live percentage engine from crashing when typing decimal points.
+* **iOS Native Support:** Injected Apple mobile web-app meta tags to ensure a seamless, fullscreen native feel without the Safari address bar.
+* 
 
 <div align="center">
 
