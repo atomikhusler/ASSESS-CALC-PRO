@@ -51,7 +51,7 @@
                 body.theme-light {
             /* FROSTED SKY (Premium Light Mode) */
             --bg-color: #e2e8f0; 
-            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.55);
             --glass-border: rgba(255, 255, 255, 1);
             --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
             
@@ -62,8 +62,8 @@
             --text-main: #0f172a;
             --text-muted: #475569;
             --accent: #0f172a;
-            --blob-1: rgba(99, 102, 241, 0.4);
-            --blob-2: rgba(14, 165, 233, 0.4);
+            --blob-1: rgba(99, 102, 241, 0.65);
+            --blob-2: rgba(14, 165, 233, 0.65);
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -73,17 +73,58 @@
             min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 16px 12px; transition: background-color 0.5s ease;
         }
-
-        /* --- THE MAGIC WATER MIXING BACKGROUND --- */
-        .fluid-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+        /* --- THE WATER MIXING BACKGROUND --- */
+        .fluid-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; transform: translateZ(0); }
         .blob {
-            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.8;
-            /* This transition is what makes the color mix smoothly like water */
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.85;
             transition: background-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, background-color; /* Hardware acceleration hint */
         }
-        .blob-1 { top: -20%; left: -20%; width: 70vw; height: 70vw; background-color: var(--blob-1); }
-        .blob-2 { bottom: -20%; right: -20%; width: 80vw; height: 80vw; background-color: var(--blob-2); }
-
+        
+        /* Smooth, complex pathing using ONLY GPU-friendly transforms */
+        @keyframes floatLiquid1 {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(5vw, 5vh) scale(1.1) rotate(5deg); }
+            66% { transform: translate(-3vw, 8vh) scale(0.95) rotate(-3deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+        @keyframes floatLiquid2 {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(-6vw, -5vh) scale(1.15) rotate(-5deg); }
+            66% { transform: translate(4vw, -7vh) scale(0.9) rotate(3deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+        .blob-1 { 
+            top: -15%; left: -15%; width: 130vw; height: 100vw; 
+            background-color: var(--blob-1); 
+            animation: floatLiquid1 22s ease-in-out infinite;
+        }
+        .blob-2 { 
+            bottom: -15%; right: -15%; width: 130vw; height: 100vw; 
+            background-color: var(--blob-2); 
+            animation: floatLiquid2 26s ease-in-out infinite;
+        }        
+        
+        /* --- ELITE RIPPLE SYSTEM 🌊 --- */
+        .ripple-container {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .ripple {
+            position: absolute; width: 80px; height: 80px;
+            border-radius: 50%; transform: translate(-50%, -50%) scale(0);
+            background: radial-gradient(circle, var(--ripple-color) 20%, transparent 80%);
+            filter: blur(10px); opacity: 0;
+            will-change: transform, opacity, filter;
+            mix-blend-mode: hard-light;
+        }
+        .ripple.animate {
+            animation: rippleEffect 1.2s ease-out forwards;
+        }
+        @keyframes rippleEffect {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.9; filter: blur(5px); }
+            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; filter: blur(30px); }
+        }
+        
         .dashboard { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 10; }
 
         /* --- HEADER --- */
@@ -97,26 +138,30 @@
 
         .btn-clear { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); color: #f43f5e; font-weight: 800; font-size: 13px; text-transform: uppercase; padding: 0 16px; border-radius: 14px; height: 44px; cursor: pointer; backdrop-filter: blur(20px); transition: 0.15s; }
         .btn-clear:active { transform: scale(0.95); }
+        
         /* --- EXTREME FROST GLASS PANEL --- */
         .glass-panel {
             background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: 28px; padding: 24px 16px; box-shadow: var(--glass-shadow);
+            border-radius: clamp(20px, 5vw, 28px); 
+            padding: clamp(16px, 4vw, 24px) clamp(12px, 3vw, 16px); 
+            box-shadow: var(--glass-shadow);
             backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%);
-            display: flex; flex-direction: column; gap: 20px; 
+            display: flex; flex-direction: column; gap: clamp(12px, 3vw, 20px); 
             transition: border-color 1.5s ease, box-shadow 1.5s ease;
         }
         
-        .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .row-4-tight { display: grid; grid-template-columns: 1.3fr 0.7fr 1.3fr 0.7fr; gap: 6px; align-items: end; }
-        .row-bottom { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; align-items: end; }
+        .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(6px, 2vw, 10px); }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(6px, 2vw, 10px); }
+        .row-4-tight { display: grid; grid-template-columns: 1.3fr 0.7fr 1.3fr 0.7fr; gap: clamp(4px, 1.5vw, 8px); align-items: end; }
+        .row-bottom { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: clamp(6px, 2vw, 10px); align-items: end; }
 
-        .cell { display: flex; flex-direction: column; gap: 5px; }
-        .label { font-size: clamp(9px, 2.5vw, 11px); font-weight: 800; color: var(--text-muted); text-transform: uppercase; text-align: center; letter-spacing: 0.5px; }
-        .label-large { font-size: clamp(12px, 3.5vw, 14px); color: var(--text-main); }
-        .sub-label { font-size: 9.5px; font-weight: 800; color: var(--text-muted); text-align: center; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+        .cell { display: flex; flex-direction: column; gap: 4px; }
+        .label { font-size: clamp(8.5px, 2.2vw, 11px); font-weight: 800; color: var(--text-muted); text-transform: uppercase; text-align: center; letter-spacing: 0.5px; }
+        .label-large { font-size: clamp(11px, 3vw, 14px); color: var(--text-main); }
+        .sub-label { font-size: clamp(8px, 2vw, 9.5px); font-weight: 800; color: var(--text-muted); text-align: center; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
 
-        input[type="number"], .output-box { width: 100%; height: 50px; border-radius: 14px; font-size: 20px; font-weight: 800; text-align: center; display: flex; align-items: center; justify-content: center; }
+        input[type="number"], .output-box { width: 100%; height: clamp(40px, 10vw, 50px); border-radius: 12px; font-size: clamp(18px, 4.5vw, 20px); font-weight: 800; text-align: center; display: flex; align-items: center; justify-content: center; }
+        
         input[type="number"] { background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); transition: 0.2s; -moz-appearance: textfield; }
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"]:focus { background: var(--input-focus); border-color: var(--text-main); }
@@ -148,7 +193,7 @@
         }
 
         .divider { border: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--glass-border), transparent); margin: 2px 0; }
-        .branding { text-align: center; margin-top: 24px; padding-bottom: 20px; opacity: 0.6; }
+        .branding { text-align: center; margin-top: 2px; opacity: 0.6; }
         .brand-sub { font-size: 10px; font-weight: 700; color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
 
         /* --- SETTINGS MODAL (Omitted CSS for brevity, it remains the same as your previous version) --- */
@@ -164,17 +209,26 @@
         .row-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
         .btn-save { width: 100%; padding: 16px; background: var(--text-main); color: var(--bg-color); font-weight: 800; font-size: 15px; border: none; border-radius: 14px; margin-top: 10px; cursor: pointer; transition: 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+        /* --- PREMIUM BRANDING --- */
+        .app-title-wrapper { text-align: center; width: 100%; margin-bottom: 4px; }
+        .app-title { font-size: clamp(24px, 6vw, 32px); font-weight: 900; letter-spacing: -0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--text-main) 0%, var(--text-muted) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .pro-badge { font-size: clamp(10px, 3vw, 12px); background: var(--text-main); color: var(--bg-color); padding: 4px 10px; border-radius: 8px; letter-spacing: 1px; text-transform: uppercase; -webkit-text-fill-color: var(--bg-color); }
+        
     </style>
 </head>
 <body class="theme-dark">
-
 <div class="fluid-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
 </div>
-
+<div id="ripple-system" class="ripple-container">
+  
+</div>
 <div class="dashboard">
+    <div class="app-title-wrapper">
+        <h1 class="app-title">Assess Calc <span class="pro-badge">Pro</span></h1>
+        <div class="branding"><div class="brand-sub">Developed by Sahil Kumar Rout</div></div>
+    </div>
     <div class="header">
         <button class="btn-icon" onclick="toggleSettings()">⚙️</button>
         <div class="toggle-group">
@@ -217,8 +271,6 @@
             </div>
         </div>
     </div>
-
-    <div class="branding"><div class="brand-sub">Developed by Sahil Kumar Rout</div></div>
 </div>
 
 <div class="modal" id="mod-set">
@@ -298,13 +350,40 @@
             }
         }
         
-        // PRO MEMORY: Save as you type
+                // PRO MEMORY: Save as user types
         let key = el.id.replace('inp-', '');
         cfg[currentMode].data[key] = el.value; 
         localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg));
         calculate();
+        
+        // --- TRIGGER RIPPLE ---
+        triggerRipple(el);
     }
 
+    function triggerRipple(element) {
+        const system = document.getElementById('ripple-system');
+        const rect = element.getBoundingClientRect();
+        
+        // Calculates the exact center point of the input box
+        const x = rect.left + (rect.width / 2);
+        const y = rect.top + (rect.height / 2);
+
+        // Creates the ripple
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple animate';
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+                // Grabs the solid bright color directly from the main panel border
+        const mainPanel = document.getElementById('main-panel');
+        const currentColor = getComputedStyle(mainPanel).borderColor;
+        ripple.style.setProperty('--ripple-color', currentColor
+        );
+        system.appendChild(ripple);
+        
+        // Self-destruct after animation to prevent lag
+        setTimeout(() => ripple.remove(), 1500);
+    }
+    
     function setMode(mode) {
         if (currentMode === mode) return;
         currentMode = mode;
@@ -331,9 +410,9 @@
         if (!isDataEntered) return { c: 'var(--text-main)', r: '---', b1: 'var(--blob-1)', b2: 'var(--blob-2)' };
         
         let isLight = document.body.classList.contains('theme-light');
-        let op1 = isLight ? 0.7 : 0.4; // Stronger ink for light mode
-        let op2 = isLight ? 0.6 : 0.3;
-
+        let op1 = isLight ? 0.55 : 0.4; 
+        let op2 = isLight ? 0.45 : 0.3;
+        
         if (score >= 91) return { c: isLight ? '#16a34a' : '#22c55e', r: 'A1 - Outstanding',   b1: `rgba(34,197,94,${op1})`,  b2: `rgba(74,222,128,${op2})` };
         if (score >= 81) return { c: isLight ? '#15803d' : '#4ade80', r: 'A2 - Excellent',     b1: `rgba(74,222,128,${op1})`, b2: `rgba(134,239,172,${op2})` };
         if (score >= 71) return { c: isLight ? '#1d4ed8' : '#3b82f6', r: 'B1 - Very Good',     b1: `rgba(59,130,246,${op1})`, b2: `rgba(96,165,250,${op2})` };
@@ -359,20 +438,24 @@
         let wrScore = m.wr > 0 ? (wr / m.wr) * w.wr : 0; setTxt('out-wr', wrScore.toFixed(1));
         let prScore = m.pr > 0 ? (pr / m.pr) * w.pr : 0; setTxt('out-pr', prScore.toFixed(1));
         let sa2Score = m.sa > 0 ? (sa2 / m.sa) * w.sa : 0; setTxt('out-sa2', sa2Score.toFixed(1));
-
-                let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
+        let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
         setTxt('out-final', grandTotal);
-
+        
+        // 1. ANY data entered? (Wakes up the fluid background & glass panel)
         let isDataEntered = Object.values(cfg[currentMode].data).some(v => v !== '');
+
+        // 2. ALL data entered? (Wakes up the final score box)
+        const requiredKeys = ['fa1', 'fa2', 'sa1', 'wr', 'pr', 'sa2'];
+        let isAllDataEntered = requiredKeys.every(key => cfg[currentMode].data[key] !== undefined && cfg[currentMode].data[key] !== '');
         
         // --- PRO FEATURE: Calculate "Live Performance Percentage" ---
         let liveScore = 0;
         let liveMax = 0;
-                const tally = (id, maxVal) => {
+        const tally = (id, maxVal) => {
             let key = id.replace('inp-', '');
             if (cfg[currentMode].data[key] !== undefined && cfg[currentMode].data[key] !== '') {
                 let parsedVal = parseFloat(cfg[currentMode].data[key]);
-                if (!isNaN(parsedVal)) { // NEW: Safety check to prevent NaN crashes
+                if (!isNaN(parsedVal)) {
                     liveScore += parsedVal;
                     liveMax += maxVal;
                 }
@@ -388,26 +471,32 @@
         
         let livePercentage = liveMax > 0 ? Math.round((liveScore / liveMax) * 100) : 0;
 
-        // --- TRIGGER FLUID CANVAS using LIVE PERCENTAGE ---
+        // --- TRIGGER FLUID CANVAS ---
+        // Pass isDataEntered so the blobs mix colors instantly!
         let grade = getFluidGrade(livePercentage, isDataEntered);
         
         let totalBox = document.getElementById('out-final');
         let remarkBox = document.getElementById('out-remark');
         let panel = document.getElementById('main-panel');
-                totalBox.style.color = 'var(--text-main)'; 
+                
+        totalBox.style.color = 'var(--text-main)'; 
         remarkBox.style.color = 'var(--text-main)';
-        totalBox.style.borderColor = grade.c;
         totalBox.style.textShadow = 'none'; 
-        totalBox.style.backgroundColor = isDataEntered ? `${grade.c}1A` : 'var(--input-bg)';
         remarkBox.innerText = grade.r;
+        
+                    // LIVE ELEMENTS: Panel reacts immediately as you type
         panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
         panel.style.boxShadow = isDataEntered ? `0 20px 50px ${grade.c}33, var(--glass-shadow)` : 'var(--glass-shadow)';
         
-        // Inject the water colors into the background blobs
-        document.documentElement.style.setProperty('--blob-1', grade.b1);
-        document.documentElement.style.setProperty('--blob-2', grade.b2);
+        // FLUID BACKGROUND & LIGHT MODE FIX: Inject into body to overpower CSS themes
+        document.body.style.setProperty('--blob-1', grade.b1);
+        document.body.style.setProperty('--blob-2', grade.b2);
+        
+        // FINAL REVEAL: Final score box stays neutral until all inputs are complete
+        totalBox.style.borderColor = isAllDataEntered ? grade.c : 'var(--text-main)';
+        totalBox.style.backgroundColor = isAllDataEntered ? `${grade.c}1A` : 'var(--input-bg)';
     }
-
+    
     /* Modal / Settings functions remain identical... */
     function toggleSettings() { let m = document.getElementById('mod-set'); if (m.style.display === 'flex') { m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); } else { setModTab(currentMode); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10); } }
     function setModTab(m) { currentModTab = m; document.getElementById('mod-btn-pri').classList.toggle('active', m === 'pri'); document.getElementById('mod-btn-up').classList.toggle('active', m === 'up'); document.getElementById('mod-sec-pri').classList.toggle('active', m === 'pri'); document.getElementById('mod-sec-up').classList.toggle('active', m === 'up'); }
