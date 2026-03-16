@@ -23,6 +23,9 @@
     <title>Assess Calc Pro</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050505">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <style>
         /* --- FLUID CANVAS & THEME ENGINE --- */
         :root {
@@ -45,26 +48,24 @@
             --blob-2: rgba(14, 165, 233, 0.15);
         }
 
-        body.theme-light {
-            /* PAPER WHITE (Light Mode) */
-            --bg-color: #fafafa;
-            --glass-bg: rgba(255, 255, 255, 0.65);
+                body.theme-light {
+            /* FROSTED SKY (Premium Light Mode) */
+            --bg-color: #e2e8f0; 
+            --glass-bg: rgba(255, 255, 255, 0.8);
             --glass-border: rgba(255, 255, 255, 1);
-            --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
             
-            --input-bg: rgba(240, 244, 248, 0.7);
-            --input-border: rgba(203, 213, 225, 0.8);
-            --input-focus: rgba(255, 255, 255, 0.9);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(148, 163, 184, 0.3);
+            --input-focus: #ffffff;
             
             --text-main: #0f172a;
-            --text-muted: #64748b;
+            --text-muted: #475569;
             --accent: #0f172a;
-            
-            /* Default Neutral Blobs */
-            --blob-1: rgba(167, 139, 250, 0.25);
-            --blob-2: rgba(56, 189, 248, 0.25);
+            --blob-1: rgba(99, 102, 241, 0.4);
+            --blob-2: rgba(14, 165, 233, 0.4);
         }
-
+        
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -96,15 +97,15 @@
 
         .btn-clear { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); color: #f43f5e; font-weight: 800; font-size: 13px; text-transform: uppercase; padding: 0 16px; border-radius: 14px; height: 44px; cursor: pointer; backdrop-filter: blur(20px); transition: 0.15s; }
         .btn-clear:active { transform: scale(0.95); }
-
         /* --- EXTREME FROST GLASS PANEL --- */
         .glass-panel {
             background: var(--glass-bg); border: 1px solid var(--glass-border);
             border-radius: 28px; padding: 24px 16px; box-shadow: var(--glass-shadow);
             backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%);
-            display: flex; flex-direction: column; gap: 20px; transition: border-color 1.5s ease;
+            display: flex; flex-direction: column; gap: 20px; 
+            transition: border-color 1.5s ease, box-shadow 1.5s ease;
         }
-
+        
         .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .row-4-tight { display: grid; grid-template-columns: 1.3fr 0.7fr 1.3fr 0.7fr; gap: 6px; align-items: end; }
@@ -286,11 +287,17 @@
     }
 
     function handleInput(e) {
-        let el = e.target; let type = el.getAttribute('data-max');
-        let maxLimit = cfg[currentMode].max[type]; 
+        let el = e.target; let type = el.getAttribute('data-max');        let maxLimit = cfg[currentMode].max[type]; 
         let val = parseFloat(el.value);
-        if (!isNaN(val) && val > maxLimit) {              el.value = maxLimit;              el.classList.add('error');             setTimeout(() => el.classList.remove('error'), 300);         }
-
+        if (!isNaN(val)) {
+            if (val < 0) { el.value = 0; } // NEW: Prevent negative marks
+            else if (val > maxLimit) { 
+                el.value = maxLimit; 
+                el.classList.add('error'); 
+                setTimeout(() => el.classList.remove('error'), 300); 
+            }
+        }
+        
         // PRO MEMORY: Save as you type
         let key = el.id.replace('inp-', '');
         cfg[currentMode].data[key] = el.value; 
@@ -318,19 +325,25 @@
         localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg));
         calculate(); document.getElementById('inp-fa1').focus();
     }
+    
  // --- FLUID CANVAS LOGIC ---
     function getFluidGrade(score, isDataEntered) {
         if (!isDataEntered) return { c: 'var(--text-main)', r: '---', b1: 'var(--blob-1)', b2: 'var(--blob-2)' };
-        if (score >= 91) return { c: '#22c55e', r: 'A1 - Outstanding',   b1: 'rgba(34,197,94,0.4)',  b2: 'rgba(74,222,128,0.3)' }; // Green
-        if (score >= 81) return { c: '#4ade80', r: 'A2 - Excellent',     b1: 'rgba(74,222,128,0.4)', b2: 'rgba(134,239,172,0.3)' }; // Light Green
-        if (score >= 71) return { c: '#3b82f6', r: 'B1 - Very Good',     b1: 'rgba(59,130,246,0.4)', b2: 'rgba(96,165,250,0.3)' }; // Blue
-        if (score >= 61) return { c: '#60a5fa', r: 'B2 - Good',          b1: 'rgba(96,165,250,0.4)', b2: 'rgba(147,197,253,0.3)' }; // Light Blue
-        if (score >= 51) return { c: '#f59e0b', r: 'C - Above Average',  b1: 'rgba(245,158,11,0.4)', b2: 'rgba(251,191,36,0.3)' }; // Amber
-        if (score >= 41) return { c: '#fbbf24', r: 'D - Average',        b1: 'rgba(251,191,36,0.4)', b2: 'rgba(252,211,77,0.3)' }; // Yellow
-        if (score >= 33) return { c: '#f97316', r: 'E - Fair',           b1: 'rgba(249,115,22,0.4)', b2: 'rgba(253,186,116,0.3)' }; // Orange
-        return { c: '#ef4444', r: 'F - Unsatisfactory', b1: 'rgba(239,68,68,0.4)', b2: 'rgba(248,113,113,0.3)' }; // Red
-    }
+        
+        let isLight = document.body.classList.contains('theme-light');
+        let op1 = isLight ? 0.7 : 0.4; // Stronger ink for light mode
+        let op2 = isLight ? 0.6 : 0.3;
 
+        if (score >= 91) return { c: isLight ? '#16a34a' : '#22c55e', r: 'A1 - Outstanding',   b1: `rgba(34,197,94,${op1})`,  b2: `rgba(74,222,128,${op2})` };
+        if (score >= 81) return { c: isLight ? '#15803d' : '#4ade80', r: 'A2 - Excellent',     b1: `rgba(74,222,128,${op1})`, b2: `rgba(134,239,172,${op2})` };
+        if (score >= 71) return { c: isLight ? '#1d4ed8' : '#3b82f6', r: 'B1 - Very Good',     b1: `rgba(59,130,246,${op1})`, b2: `rgba(96,165,250,${op2})` };
+        if (score >= 61) return { c: isLight ? '#2563eb' : '#60a5fa', r: 'B2 - Good',          b1: `rgba(96,165,250,${op1})`, b2: `rgba(147,197,253,${op2})` };
+        if (score >= 51) return { c: isLight ? '#b45309' : '#f59e0b', r: 'C - Above Average',  b1: `rgba(245,158,11,${op1})`, b2: `rgba(251,191,36,${op2})` };
+        if (score >= 41) return { c: isLight ? '#a16207' : '#fbbf24', r: 'D - Average',        b1: `rgba(251,191,36,${op1})`, b2: `rgba(252,211,77,${op2})` };
+        if (score >= 33) return { c: isLight ? '#c2410c' : '#f97316', r: 'E - Fair',           b1: `rgba(249,115,22,${op1})`, b2: `rgba(253,186,116,${op2})` };
+        return { c: isLight ? '#b91c1c' : '#ef4444', r: 'F - Unsatisfactory', b1: `rgba(239,68,68,${op1})`, b2: `rgba(248,113,113,${op2})` };
+    }
+    
     function calculate() {
         const getVal = id => { let v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
         const setTxt = (id, val) => document.getElementById(id).innerText = val;
@@ -347,25 +360,48 @@
         let prScore = m.pr > 0 ? (pr / m.pr) * w.pr : 0; setTxt('out-pr', prScore.toFixed(1));
         let sa2Score = m.sa > 0 ? (sa2 / m.sa) * w.sa : 0; setTxt('out-sa2', sa2Score.toFixed(1));
 
-        let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
+                let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
         setTxt('out-final', grandTotal);
 
-        // Check if ANY field has data to prevent showing 'F' when completely empty
         let isDataEntered = Object.values(cfg[currentMode].data).some(v => v !== '');
         
-        // --- TRIGGER FLUID CANVAS & GRADE LOGIC ---
-        let grade = getFluidGrade(grandTotal, isDataEntered);
+        // --- PRO FEATURE: Calculate "Live Performance Percentage" ---
+        let liveScore = 0;
+        let liveMax = 0;
+                const tally = (id, maxVal) => {
+            let key = id.replace('inp-', '');
+            if (cfg[currentMode].data[key] !== undefined && cfg[currentMode].data[key] !== '') {
+                let parsedVal = parseFloat(cfg[currentMode].data[key]);
+                if (!isNaN(parsedVal)) { // NEW: Safety check to prevent NaN crashes
+                    liveScore += parsedVal;
+                    liveMax += maxVal;
+                }
+            }
+        };
+
+        tally('inp-fa1', m.fa);
+        tally('inp-fa2', m.fa);
+        tally('inp-sa1', m.sa);
+        tally('inp-wr', m.wr);
+        tally('inp-pr', m.pr);
+        tally('inp-sa2', m.sa);
+        
+        let livePercentage = liveMax > 0 ? Math.round((liveScore / liveMax) * 100) : 0;
+
+        // --- TRIGGER FLUID CANVAS using LIVE PERCENTAGE ---
+        let grade = getFluidGrade(livePercentage, isDataEntered);
         
         let totalBox = document.getElementById('out-final');
         let remarkBox = document.getElementById('out-remark');
         let panel = document.getElementById('main-panel');
-        
-        totalBox.style.color = 'var(--text-main)'; 
+                totalBox.style.color = 'var(--text-main)'; 
         remarkBox.style.color = 'var(--text-main)';
         totalBox.style.borderColor = grade.c;
-        totalBox.style.textShadow = isDataEntered ? `0 0 10px ${grade.c}` : 'none';
+        totalBox.style.textShadow = 'none'; 
+        totalBox.style.backgroundColor = isDataEntered ? `${grade.c}1A` : 'var(--input-bg)';
         remarkBox.innerText = grade.r;
         panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
+        panel.style.boxShadow = isDataEntered ? `0 20px 50px ${grade.c}33, var(--glass-shadow)` : 'var(--glass-shadow)';
         
         // Inject the water colors into the background blobs
         document.documentElement.style.setProperty('--blob-1', grade.b1);
