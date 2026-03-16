@@ -1,4 +1,4 @@
-var CACHE_NAME = 'calc-pro-v6'; 
+var CACHE_NAME = 'calc-pro-v7-fluid'; 
 var ASSETS = [
   './',
   './index.html',

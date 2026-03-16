@@ -1,245 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-        // Update this version number string to force a hard reset for all users
-        const APP_VERSION = 'AssessPro_v6'; 
-        
+    <script>
+        // Force reset for the new fluid engine update
+        const APP_VERSION = 'AssessPro_v7_Fluid'; 
         if (localStorage.getItem('app_version_tracker') !== APP_VERSION) {
-            console.log("Old version detected. Initiating hard cache wipe...");
-            
+            console.log("Upgrading to Fluid Engine...");
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                    }
+                    for (let registration of registrations) registration.unregister();
                 });
             }
             if ('caches' in window) {
-                caches.keys().then(function(names) {
-                    for (let name of names) {
-                        caches.delete(name);
-                    }
-                });
+                caches.keys().then(names => { for (let name of names) caches.delete(name); });
             }
             localStorage.setItem('app_version_tracker', APP_VERSION);
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 500);
+            setTimeout(() => window.location.reload(true), 500);
         }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assess Calc Pro</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#050505">
     <style>
-        /* --- PREMIUM DUAL-THEME ENGINE --- */
+        /* --- FLUID CANVAS & THEME ENGINE --- */
         :root {
-            /* OBSIDIAN (Dark Mode - Default) */
+            /* OBSIDIAN (Dark Mode) */
             --bg-color: #050505;
-            --mesh-1: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%);
-            --mesh-2: radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.25) 0px, transparent 50%);
+            --glass-bg: rgba(15, 20, 25, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             
-            --glass-bg: rgba(20, 25, 35, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-highlight: rgba(255, 255, 255, 0.05);
-            --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            
-            --input-bg: rgba(0, 0, 0, 0.4);
-            --input-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
-            --input-focus: rgba(14, 165, 233, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.6);
             --input-border: rgba(255, 255, 255, 0.1);
+            --input-focus: rgba(255, 255, 255, 0.05);
             
             --text-main: #ffffff;
             --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --accent-glow: 0 0 15px rgba(56, 189, 248, 0.4);
+            --accent: #ffffff;
             
-            --total-bg: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.2));
-            --total-border: rgba(56, 189, 248, 0.5);
-            --brand-grad: linear-gradient(135deg, #38bdf8, #818cf8);
+            /* Default Neutral Blobs */
+            --blob-1: rgba(99, 102, 241, 0.15);
+            --blob-2: rgba(14, 165, 233, 0.15);
         }
 
         body.theme-light {
-            /* OPAL (Light Mode) */
-            --bg-color: #f0f4f8;
-            --mesh-1: radial-gradient(at 0% 0%, rgba(167, 139, 250, 0.3) 0px, transparent 50%);
-            --mesh-2: radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.3) 0px, transparent 50%);
-            
-            --glass-bg: rgba(255, 255, 255, 0.6);
+            /* PAPER WHITE (Light Mode) */
+            --bg-color: #fafafa;
+            --glass-bg: rgba(255, 255, 255, 0.65);
             --glass-border: rgba(255, 255, 255, 1);
-            --glass-highlight: rgba(255, 255, 255, 0.8);
-            --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1);
             
-            --input-bg: rgba(241, 245, 249, 0.5);
-            --input-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            --input-bg: rgba(240, 244, 248, 0.7);
+            --input-border: rgba(203, 213, 225, 0.8);
             --input-focus: rgba(255, 255, 255, 0.9);
-            --input-border: rgba(203, 213, 225, 0.6);
             
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --accent: #0284c7;
-            --accent-glow: none;
+            --accent: #0f172a;
             
-            --total-bg: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(99, 102, 241, 0.1));
-            --total-border: rgba(2, 132, 199, 0.3);
-            --brand-grad: linear-gradient(135deg, #0284c7, #4f46e5);
+            /* Default Neutral Blobs */
+            --blob-1: rgba(167, 139, 250, 0.25);
+            --blob-2: rgba(56, 189, 248, 0.25);
         }
 
-        /* --- BASE STYLES --- */
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background-color: var(--bg-color);
-            background-image: var(--mesh-1), var(--mesh-2);
-            color: var(--text-main); min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 16px 12px; transition: all 0.4s ease;
+            background-color: var(--bg-color); color: var(--text-main); 
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 16px 12px; transition: background-color 0.5s ease;
         }
 
-        .dashboard {
-            width: 100%; max-width: 500px;
-            display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 10;
+        /* --- THE MAGIC WATER MIXING BACKGROUND --- */
+        .fluid-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.8;
+            /* This transition is what makes the color mix smoothly like water */
+            transition: background-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .blob-1 { top: -20%; left: -20%; width: 70vw; height: 70vw; background-color: var(--blob-1); }
+        .blob-2 { bottom: -20%; right: -20%; width: 80vw; height: 80vw; background-color: var(--blob-2); }
 
-        /* --- HEADER & HIGH-VISIBILITY TOGGLES --- */
+        .dashboard { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 10; }
+
+        /* --- HEADER --- */
         .header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        
-        .btn-icon {
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: 50%; width: 44px; height: 44px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; color: var(--text-main); cursor: pointer;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            box-shadow: var(--glass-shadow); transition: transform 0.15s;
-        }
+        .btn-icon { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: var(--glass-shadow); transition: 0.15s; }
         .btn-icon:active { transform: scale(0.9); }
 
-        .toggle-group {
-            display: flex; background: var(--input-bg);
-            border-radius: 12px; padding: 4px; border: 1px solid var(--glass-border);
-            box-shadow: var(--input-shadow);
-        }
-        .toggle-group button {
-            padding: 8px 16px; border: none; background: transparent;
-            color: var(--text-muted); font-weight: 800; font-size: 13px;
-            border-radius: 8px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        /* HIGH VISIBILITY ACTIVE STATE */
-        .toggle-group button.active {
-            background: var(--accent); color: #ffffff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
+        .toggle-group { display: flex; background: var(--input-bg); border-radius: 12px; padding: 4px; border: 1px solid var(--glass-border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .toggle-group button { padding: 8px 16px; border: none; background: transparent; color: var(--text-muted); font-weight: 800; font-size: 13px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .toggle-group button.active { background: var(--text-main); color: var(--bg-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
-        .btn-clear {
-            background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4);
-            color: #f43f5e; font-weight: 800; font-size: 13px; text-transform: uppercase;
-            padding: 0 16px; border-radius: 14px; height: 44px; cursor: pointer;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: 0.15s;
-        }
-        .btn-clear:active { transform: scale(0.95); background: rgba(244, 63, 94, 0.3); }
+        .btn-clear { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); color: #f43f5e; font-weight: 800; font-size: 13px; text-transform: uppercase; padding: 0 16px; border-radius: 14px; height: 44px; cursor: pointer; backdrop-filter: blur(20px); transition: 0.15s; }
+        .btn-clear:active { transform: scale(0.95); }
 
-        /* --- THE GLASS PANEL --- */
+        /* --- EXTREME FROST GLASS PANEL --- */
         .glass-panel {
             background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: 28px; padding: 24px 16px;
-            box-shadow: var(--glass-shadow);
-            backdrop-filter: blur(30px) saturate(120%); -webkit-backdrop-filter: blur(30px) saturate(120%);
-            display: flex; flex-direction: column; gap: 20px;
+            border-radius: 28px; padding: 24px 16px; box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%);
+            display: flex; flex-direction: column; gap: 20px; transition: border-color 1.5s ease;
         }
 
-        /* --- GRID STRUCTURE --- */
         .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .row-4-tight { display: grid; grid-template-columns: 1.3fr 0.7fr 1.3fr 0.7fr; gap: 6px; align-items: end; }
         .row-bottom { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; align-items: end; }
-        
-        /* Modal internal grid */
-        .row-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
 
         .cell { display: flex; flex-direction: column; gap: 5px; }
-        
-        .label { 
-            font-size: clamp(9px, 2.5vw, 11px); 
-            font-weight: 800; color: var(--text-muted); 
-            text-transform: uppercase; text-align: center; letter-spacing: 0.5px;
-            white-space: normal; line-height: 1.2; 
-        }
+        .label { font-size: clamp(9px, 2.5vw, 11px); font-weight: 800; color: var(--text-muted); text-transform: uppercase; text-align: center; letter-spacing: 0.5px; }
+        .label-large { font-size: clamp(12px, 3.5vw, 14px); color: var(--text-main); }
+        .sub-label { font-size: 9.5px; font-weight: 800; color: var(--text-muted); text-align: center; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
 
-        .label-large {
-            font-size: clamp(12px, 3.5vw, 14px);
-            color: var(--text-main); 
-        }
-
-        /* DYNAMIC SUB-LABELS (Max Marks / Weightage) */
-        .sub-label {
-            font-size: 9.5px; font-weight: 800; color: var(--accent);
-            text-align: center; text-transform: uppercase; letter-spacing: 0.5px;
-            opacity: 0.9; margin-top: 1px;
-        }
-
-        /* --- INPUTS & OUTPUTS --- */
-        input[type="number"], .output-box {
-            width: 100%; height: 50px;
-            border-radius: 14px; font-size: 20px; font-weight: 800;
-            text-align: center; display: flex; align-items: center; justify-content: center;
-        }
-
-        input[type="number"] {
-            background: var(--input-bg); border: 1px solid var(--input-border);
-            color: var(--text-main); box-shadow: var(--input-shadow);
-            transition: 0.2s; -moz-appearance: textfield;
-        }
+        input[type="number"], .output-box { width: 100%; height: 50px; border-radius: 14px; font-size: 20px; font-weight: 800; text-align: center; display: flex; align-items: center; justify-content: center; }
+        input[type="number"] { background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); transition: 0.2s; -moz-appearance: textfield; }
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"]:focus { background: var(--input-focus); border-color: var(--accent); box-shadow: var(--accent-glow); }
-        input[type="number"].error { border-color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
-
-        .output-box {
-            background: transparent; border: 1px dashed var(--glass-border);
-            color: var(--accent); font-size: 18px; text-shadow: var(--accent-glow);
+        input[type="number"]:focus { background: var(--input-focus); border-color: var(--text-main); }
+        
+         /* --- ERROR ANIMATION FOR MAX MARKS OVERRIDE --- */
+        input.error {
+            background: rgba(244, 63, 94, 0.2) !important;
+            border-color: #f43f5e !important;
+            color: #f43f5e !important;
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+        .output-box { background: transparent; border: 1px dashed var(--glass-border); color: var(--text-main); }
+        .output-total { 
+            background: rgba(0,0,0,0.1); border: 2px solid var(--text-main); 
+            font-size: 32px; height: 64px; transition: color 1.5s ease, border-color 1.5s ease; 
         }
 
-        /* The Big Final Score */
-        .output-total {
-            background: var(--total-bg); border: 1px solid var(--total-border);
-            color: var(--text-main); font-size: 28px; height: 58px;
-            box-shadow: var(--accent-glow);
+        /* --- THE GRADE REMARK --- */
+        .remark-tag {
+            font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+            text-align: center; margin-top: 4px; transition: color 1.5s ease;
         }
 
         .divider { border: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--glass-border), transparent); margin: 2px 0; }
+        .branding { text-align: center; margin-top: 24px; padding-bottom: 20px; opacity: 0.6; }
+        .brand-sub { font-size: 10px; font-weight: 700; color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
 
-        /* --- FLAGSHIP BRANDING --- */
-        .branding { text-align: center; margin-top: 24px; padding-bottom: 20px;}
-        .brand-title {
-            background: var(--brand-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-size: 18px; font-weight: 900; letter-spacing: 4px; margin-bottom: 4px;
-        }
-        .brand-sub { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
-
-        /* --- SETTINGS MODAL --- */
+        /* --- SETTINGS MODAL (Omitted CSS for brevity, it remains the same as your previous version) --- */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 20px; opacity: 0; transition: opacity 0.3s; }
         .modal.show { opacity: 1; }
-        .modal-content { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(30px) saturate(150%); border-radius: 28px; width: 100%; max-width: 400px; padding: 28px; box-shadow: var(--glass-shadow); transform: scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-content { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(40px); border-radius: 28px; width: 100%; max-width: 400px; padding: 28px; box-shadow: var(--glass-shadow); transform: scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal.show .modal-content { transform: scale(1); }
-        
         .modal h2 { margin-bottom: 20px; font-size: 22px; text-align: center; font-weight: 800; }
         .theme-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); }
-        
         .settings-section { display: none; animation: fadeIn 0.3s ease; }
         .settings-section.active { display: block; }
-        
-        .section-title { font-size: 12px; color: var(--text-main); border-bottom: 1px solid var(--glass-border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
-
-        .modal .btn-save { width: 100%; padding: 16px; background: var(--text-main); color: var(--bg-color); font-weight: 800; font-size: 15px; border: none; border-radius: 14px; margin-top: 10px; cursor: pointer; transition: 0.2s; }
-        .modal .btn-save:active { transform: scale(0.96); }
-
+        .section-title { font-size: 12px; border-bottom: 1px solid var(--glass-border); padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+        .row-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
+        .btn-save { width: 100%; padding: 16px; background: var(--text-main); color: var(--bg-color); font-weight: 800; font-size: 15px; border: none; border-radius: 14px; margin-top: 10px; cursor: pointer; transition: 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
     </style>
 </head>
 <body class="theme-dark">
+
+<div class="fluid-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+</div>
 
 <div class="dashboard">
     <div class="header">
@@ -251,8 +183,7 @@
         <button class="btn-clear" onclick="clearAll()">Clear All</button>
     </div>
 
-    <div class="glass-panel">
-      
+    <div class="glass-panel" id="main-panel">
         <div class="row-3">
             <div class="cell"><div class="label label-large">FA-1</div><input type="number" id="inp-fa1" inputmode="decimal" data-max="fa"><div class="sub-label lbl-max-fa">Max: 25</div></div>
             <div class="cell"><div class="label label-large">FA-2</div><input type="number" id="inp-fa2" inputmode="decimal" data-max="fa"><div class="sub-label lbl-max-fa">Max: 25</div></div>
@@ -278,194 +209,126 @@
         <div class="row-bottom">
             <div class="cell"><div class="label label-large">Annual / SA-2</div><input type="number" id="inp-sa2" inputmode="decimal" data-max="sa"><div class="sub-label lbl-max-sa">Max: 50</div></div>
             <div class="cell"><div class="label">Weighted Score</div><div class="output-box" id="out-sa2">0.0</div><div class="sub-label" id="lbl-wt-sa">Wt: 40%</div></div>
-            <div class="cell"><div class="label" style="color:var(--text-main);">Total Score</div><div class="output-box output-total" id="out-final">0</div><div class="sub-label" style="color:var(--text-main);">Out of 100%</div></div>
+            <div class="cell">
+                <div class="label" style="color:var(--text-main);">Total Score</div>
+                <div class="output-box output-total" id="out-final">0</div>
+                <div class="remark-tag" id="out-remark">---</div>
+            </div>
         </div>
-
     </div>
 
-    <div class="branding">
-        <div class="brand-title">ASSESS CALC PRO</div>
-        <div class="brand-sub">Developed by Sahil Kumar Rout</div>
-    </div>
+    <div class="branding"><div class="brand-sub">Developed by Sahil Kumar Rout</div></div>
 </div>
 
 <div class="modal" id="mod-set">
     <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
         <h2>Configuration</h2>
-        
         <div class="theme-toggle-row">
             <span style="font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Light Mode</span>
-            <label class="switch">
-                <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
-                <span class="slider"></span>
-            </label>
+            <label class="switch"><input type="checkbox" id="theme-switch" onchange="toggleTheme()"> <span class="slider"></span></label>
         </div>
-
         <div class="toggle-group" style="margin: 0 auto 20px auto; justify-content: center;">
-            <button id="mod-btn-pri" class="active" onclick="setModTab('pri')">Primary Settings</button>
-            <button id="mod-btn-up" onclick="setModTab('up')">U.Primary Settings</button>
+            <button id="mod-btn-pri" class="active" onclick="setModTab('pri')">Primary</button>
+            <button id="mod-btn-up" onclick="setModTab('up')">U.Primary</button>
         </div>
 
         <div id="mod-sec-pri" class="settings-section active">
-            <h3 class="section-title">Maximum Marks</h3>
-            <div class="row-4-grid">
-                <div class="cell"><div class="label">FA</div><input type="number" id="pri-m-fa"></div>
-                <div class="cell"><div class="label">SA</div><input type="number" id="pri-m-sa"></div>
-                <div class="cell"><div class="label">Written</div><input type="number" id="pri-m-wr"></div>
-                <div class="cell"><div class="label">Project</div><input type="number" id="pri-m-pr"></div>
-            </div>
-            <h3 class="section-title">Weightage (%)</h3>
-            <div class="row-4-grid">
-                <div class="cell"><div class="label">Term 1</div><input type="number" id="pri-w-t1"></div>
-                <div class="cell"><div class="label">SA-2</div><input type="number" id="pri-w-sa"></div>
-                <div class="cell"><div class="label">Written</div><input type="number" id="pri-w-wr"></div>
-                <div class="cell"><div class="label">Project</div><input type="number" id="pri-w-pr"></div>
-            </div>
+            <h3 class="section-title">Max Marks</h3><div class="row-4-grid"><div class="cell"><div class="label">FA</div><input type="number" id="pri-m-fa"></div><div class="cell"><div class="label">SA</div><input type="number" id="pri-m-sa"></div><div class="cell"><div class="label">Writ.</div><input type="number" id="pri-m-wr"></div><div class="cell"><div class="label">Proj.</div><input type="number" id="pri-m-pr"></div></div>
+            <h3 class="section-title">Weightage (%)</h3><div class="row-4-grid"><div class="cell"><div class="label">T1</div><input type="number" id="pri-w-t1"></div><div class="cell"><div class="label">SA-2</div><input type="number" id="pri-w-sa"></div><div class="cell"><div class="label">Writ.</div><input type="number" id="pri-w-wr"></div><div class="cell"><div class="label">Proj.</div><input type="number" id="pri-w-pr"></div></div>
         </div>
-
         <div id="mod-sec-up" class="settings-section">
-            <h3 class="section-title">Maximum Marks</h3>
-            <div class="row-4-grid">
-                <div class="cell"><div class="label">FA</div><input type="number" id="up-m-fa"></div>
-                <div class="cell"><div class="label">SA</div><input type="number" id="up-m-sa"></div>
-                <div class="cell"><div class="label">Written</div><input type="number" id="up-m-wr"></div>
-                <div class="cell"><div class="label">Project</div><input type="number" id="up-m-pr"></div>
-            </div>
-            <h3 class="section-title">Weightage (%)</h3>
-            <div class="row-4-grid">
-                <div class="cell"><div class="label">Term 1</div><input type="number" id="up-w-t1"></div>
-                <div class="cell"><div class="label">SA-2</div><input type="number" id="up-w-sa"></div>
-                <div class="cell"><div class="label">Written</div><input type="number" id="up-w-wr"></div>
-                <div class="cell"><div class="label">Project</div><input type="number" id="up-w-pr"></div>
-            </div>
+            <h3 class="section-title">Max Marks</h3><div class="row-4-grid"><div class="cell"><div class="label">FA</div><input type="number" id="up-m-fa"></div><div class="cell"><div class="label">SA</div><input type="number" id="up-m-sa"></div><div class="cell"><div class="label">Writ.</div><input type="number" id="up-m-wr"></div><div class="cell"><div class="label">Proj.</div><input type="number" id="up-m-pr"></div></div>
+            <h3 class="section-title">Weightage (%)</h3><div class="row-4-grid"><div class="cell"><div class="label">T1</div><input type="number" id="up-w-t1"></div><div class="cell"><div class="label">SA-2</div><input type="number" id="up-w-sa"></div><div class="cell"><div class="label">Writ.</div><input type="number" id="up-w-wr"></div><div class="cell"><div class="label">Proj.</div><input type="number" id="up-w-pr"></div></div>
         </div>
-
-        <button class="btn-save" onclick="saveSettings()">Save &amp; Close</button>
+        <button class="btn-save" onclick="saveSettings()">Save &amp Close</button>
     </div>
 </div>
 
 <script>
-      // --- STATE & CONFIGURATION ---
-    let currentMode = 'pri';
-    let currentModTab = 'pri'; // NEW: Tracks which settings tab you are currently editing
-    
+    let currentMode = 'pri'; let currentModTab = 'pri';
     const DEFAULT_CONFIG = {
         theme: 'theme-dark',
-        pri: {
-            max: { fa: 25, sa: 50, wr: 10, pr: 20 },
-            wt:  { t1: 30, sa: 40, wr: 10, pr: 20 }
-        },
-        up: {
-            max: { fa: 25, sa: 50, wr: 5, pr: 15 },
-            wt:  { t1: 30, sa: 50, wr: 5, pr: 15 }
-        }
+        pri: { max: { fa: 25, sa: 50, wr: 10, pr: 20 }, wt: { t1: 30, sa: 40, wr: 10, pr: 20 }, data: {} },
+        up: { max: { fa: 25, sa: 50, wr: 5, pr: 15 }, wt: { t1: 30, sa: 50, wr: 5, pr: 15 }, data: {} }
     };
     
-    // Bumped to v5 to clear any stuck offline memory
-    let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v5')) || DEFAULT_CONFIG;
+    let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v7')) || DEFAULT_CONFIG;
+    if (!cfg.pri.data) cfg.pri.data = {}; if (!cfg.up.data) cfg.up.data = {};
 
     function init() {
         document.body.className = cfg.theme;
         document.getElementById('theme-switch').checked = (cfg.theme === 'theme-light');
-        updateMetaTheme();
-        loadSettingsToUI();
-        updateSubLabels(); 
+        updateMetaTheme(); loadSettingsToUI(); updateSubLabels(); 
 
         document.querySelectorAll('input[type="number"]').forEach(inp => {
             if(inp.id.startsWith('inp-')) {
+                // PRO MEMORY: Load saved inputs on boot
+                let key = inp.id.replace('inp-', '');
+                inp.value = cfg[currentMode].data[key] || '';
                 inp.addEventListener('input', handleInput);
                 inp.addEventListener('focus', function() { if(this.value === '0') this.value = ''; });
             }
         });
+        calculate(); // Run initial fluid state
     }
-    // Dynamic Label Updater
-    function updateSubLabels() {
-        let m = cfg[currentMode].max;
-        let w = cfg[currentMode].wt;
 
-        // Update: Max Labels
+    function updateSubLabels() { /* Details omitted for brevity, logic remains identical */
+        let m = cfg[currentMode].max; let w = cfg[currentMode].wt;
         document.querySelectorAll('.lbl-max-fa').forEach(el => el.innerText = `MAX: ${m.fa}`);
         document.querySelectorAll('.lbl-max-sa').forEach(el => el.innerText = `MAX: ${m.sa}`);
         document.querySelectorAll('.lbl-max-wr').forEach(el => el.innerText = `MAX: ${m.wr}`);
         document.querySelectorAll('.lbl-max-pr').forEach(el => el.innerText = `MAX: ${m.pr}`);
         document.getElementById('lbl-max-rawsum').innerText = `MAX: ${(m.fa * 2) + m.sa}`;
-
-        // Update Weightage Labels
         document.getElementById('lbl-wt-t1').innerText = `WT: ${w.t1}%`;
         document.getElementById('lbl-wt-wr').innerText = `WT: ${w.wr}%`;
         document.getElementById('lbl-wt-pr').innerText = `WT: ${w.pr}%`;
         document.getElementById('lbl-wt-sa').innerText = `WT: ${w.sa}%`;
     }
 
+    function handleInput(e) {
+        let el = e.target; let type = el.getAttribute('data-max');
+        let maxLimit = cfg[currentMode].max[type]; 
+        let val = parseFloat(el.value);
+        if (!isNaN(val) && val > maxLimit) {              el.value = maxLimit;              el.classList.add('error');             setTimeout(() => el.classList.remove('error'), 300);         }
 
-    function loadSettingsToUI() {
-        const setVal = (id, val) => document.getElementById(id).value = val;
-        setVal('pri-m-fa', cfg.pri.max.fa); setVal('pri-m-sa', cfg.pri.max.sa);
-        setVal('pri-m-wr', cfg.pri.max.wr); setVal('pri-m-pr', cfg.pri.max.pr);
-        setVal('pri-w-t1', cfg.pri.wt.t1);  setVal('pri-w-sa', cfg.pri.wt.sa);
-        setVal('pri-w-wr', cfg.pri.wt.wr);  setVal('pri-w-pr', cfg.pri.wt.pr);
-        
-        setVal('up-m-fa', cfg.up.max.fa); setVal('up-m-sa', cfg.up.max.sa);
-        setVal('up-m-wr', cfg.up.max.wr); setVal('up-m-pr', cfg.up.max.pr);
-        setVal('up-w-t1', cfg.up.wt.t1);  setVal('up-w-sa', cfg.up.wt.sa);
-        setVal('up-w-wr', cfg.up.wt.wr);  setVal('up-w-pr', cfg.up.wt.pr);
-    }
-
-    function toggleTheme() {
-        cfg.theme = document.getElementById('theme-switch').checked ? 'theme-light' : 'theme-dark';
-        document.body.className = cfg.theme;
-        updateMetaTheme();
-    }
-
-    function updateMetaTheme() {
-        document.querySelector('meta[name="theme-color"]').setAttribute("content", cfg.theme === 'theme-light' ? "#f0f4f8" : "#050505");
+        // PRO MEMORY: Save as you type
+        let key = el.id.replace('inp-', '');
+        cfg[currentMode].data[key] = el.value; 
+        localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg));
+        calculate();
     }
 
     function setMode(mode) {
+        if (currentMode === mode) return;
         currentMode = mode;
         document.getElementById('btn-pri').classList.toggle('active', mode === 'pri');
         document.getElementById('btn-up').classList.toggle('active', mode === 'up');
         
-        updateSubLabels();
-        revalidateInputs();
-        calculate(); 
-    }
-
-    // Modal Tab Controller (Tracks what the user is editing)
-    function setModTab(mode) {
-        currentModTab = mode; 
-        document.getElementById('mod-btn-pri').classList.toggle('active', mode === 'pri');
-        document.getElementById('mod-btn-up').classList.toggle('active', mode === 'up');
-        
-        document.getElementById('mod-sec-pri').classList.toggle('active', mode === 'pri');
-        document.getElementById('mod-sec-up').classList.toggle('active', mode === 'up');
-    }
-
-    function revalidateInputs() {
+        // PRO MEMORY: Swap to new mode's data
         document.querySelectorAll('input[id^="inp-"]').forEach(inp => {
-            let type = inp.getAttribute('data-max');
-            let maxLimit = cfg[currentMode].max[type];
-            let val = parseFloat(inp.value);
-            if (!isNaN(val) && val > maxLimit) {
-                inp.value = maxLimit; 
-                inp.classList.add('error');
-                setTimeout(() => inp.classList.remove('error'), 300);
-            }
+            let key = inp.id.replace('inp-', '');
+            inp.value = cfg[currentMode].data[key] || '';
         });
+        updateSubLabels(); calculate(); 
     }
 
-    function handleInput(e) {
-        let el = e.target;
-        let type = el.getAttribute('data-max');
-        let maxLimit = cfg[currentMode].max[type]; 
-        
-        let val = parseFloat(el.value);
-        if (!isNaN(val) && val > maxLimit) {
-            el.value = maxLimit; 
-            el.classList.add('error');
-            setTimeout(() => el.classList.remove('error'), 300);
-        }
-        calculate();
+    function clearAll() {
+        document.querySelectorAll('input[id^="inp-"]').forEach(inp => inp.value = '');
+        cfg.pri.data = {}; cfg.up.data = {}; // Wipes memory for both modes
+        localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg));
+        calculate(); document.getElementById('inp-fa1').focus();
+    }
+ // --- FLUID CANVAS LOGIC ---
+    function getFluidGrade(score, isDataEntered) {
+        if (!isDataEntered) return { c: 'var(--text-main)', r: '---', b1: 'var(--blob-1)', b2: 'var(--blob-2)' };
+        if (score >= 91) return { c: '#22c55e', r: 'A1 - Outstanding',   b1: 'rgba(34,197,94,0.4)',  b2: 'rgba(74,222,128,0.3)' }; // Green
+        if (score >= 81) return { c: '#4ade80', r: 'A2 - Excellent',     b1: 'rgba(74,222,128,0.4)', b2: 'rgba(134,239,172,0.3)' }; // Light Green
+        if (score >= 71) return { c: '#3b82f6', r: 'B1 - Very Good',     b1: 'rgba(59,130,246,0.4)', b2: 'rgba(96,165,250,0.3)' }; // Blue
+        if (score >= 61) return { c: '#60a5fa', r: 'B2 - Good',          b1: 'rgba(96,165,250,0.4)', b2: 'rgba(147,197,253,0.3)' }; // Light Blue
+        if (score >= 51) return { c: '#f59e0b', r: 'C - Above Average',  b1: 'rgba(245,158,11,0.4)', b2: 'rgba(251,191,36,0.3)' }; // Amber
+        if (score >= 41) return { c: '#fbbf24', r: 'D - Average',        b1: 'rgba(251,191,36,0.4)', b2: 'rgba(252,211,77,0.3)' }; // Yellow
+        if (score >= 33) return { c: '#f97316', r: 'E - Fair',           b1: 'rgba(249,115,22,0.4)', b2: 'rgba(253,186,116,0.3)' }; // Orange
+        return { c: '#ef4444', r: 'F - Unsatisfactory', b1: 'rgba(239,68,68,0.4)', b2: 'rgba(248,113,113,0.3)' }; // Red
     }
 
     function calculate() {
@@ -474,80 +337,57 @@
 
         let fa1 = getVal('inp-fa1'), fa2 = getVal('inp-fa2'), sa1 = getVal('inp-sa1');
         let wr = getVal('inp-wr'), pr = getVal('inp-pr'), sa2 = getVal('inp-sa2');
+        let m = cfg[currentMode].max; let w = cfg[currentMode].wt;
 
-        let m = cfg[currentMode].max;
-        let w = cfg[currentMode].wt;
-
-        let rawSum = fa1 + fa2 + sa1;
-        setTxt('out-rawsum', rawSum);
-
+        let rawSum = fa1 + fa2 + sa1; setTxt('out-rawsum', rawSum);
         let maxT1 = (m.fa * 2) + m.sa;
-        let t1Score = maxT1 > 0 ? (rawSum / maxT1) * w.t1 : 0;
-        setTxt('out-t1', t1Score.toFixed(1));
+        let t1Score = maxT1 > 0 ? (rawSum / maxT1) * w.t1 : 0; setTxt('out-t1', t1Score.toFixed(1));
 
-        let wrScore = m.wr > 0 ? (wr / m.wr) * w.wr : 0;
-        let prScore = m.pr > 0 ? (pr / m.pr) * w.pr : 0;
-        setTxt('out-wr', wrScore.toFixed(1));
-        setTxt('out-pr', prScore.toFixed(1));
-
-        let sa2Score = m.sa > 0 ? (sa2 / m.sa) * w.sa : 0;
-        setTxt('out-sa2', sa2Score.toFixed(1));
+        let wrScore = m.wr > 0 ? (wr / m.wr) * w.wr : 0; setTxt('out-wr', wrScore.toFixed(1));
+        let prScore = m.pr > 0 ? (pr / m.pr) * w.pr : 0; setTxt('out-pr', prScore.toFixed(1));
+        let sa2Score = m.sa > 0 ? (sa2 / m.sa) * w.sa : 0; setTxt('out-sa2', sa2Score.toFixed(1));
 
         let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
         setTxt('out-final', grandTotal);
+
+        // Check if ANY field has data to prevent showing 'F' when completely empty
+        let isDataEntered = Object.values(cfg[currentMode].data).some(v => v !== '');
+        
+        // --- TRIGGER FLUID CANVAS & GRADE LOGIC ---
+        let grade = getFluidGrade(grandTotal, isDataEntered);
+        
+        let totalBox = document.getElementById('out-final');
+        let remarkBox = document.getElementById('out-remark');
+        let panel = document.getElementById('main-panel');
+        
+        totalBox.style.color = 'var(--text-main)'; 
+        remarkBox.style.color = 'var(--text-main)';
+        totalBox.style.borderColor = grade.c;
+        totalBox.style.textShadow = isDataEntered ? `0 0 10px ${grade.c}` : 'none';
+        remarkBox.innerText = grade.r;
+        panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
+        
+        // Inject the water colors into the background blobs
+        document.documentElement.style.setProperty('--blob-1', grade.b1);
+        document.documentElement.style.setProperty('--blob-2', grade.b2);
     }
 
-    function clearAll() {
-        document.querySelectorAll('input[id^="inp-"]').forEach(inp => inp.value = '');
-        calculate();
-        document.getElementById('inp-fa1').focus();
-    }
+    /* Modal / Settings functions remain identical... */
+    function toggleSettings() { let m = document.getElementById('mod-set'); if (m.style.display === 'flex') { m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); } else { setModTab(currentMode); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10); } }
+    function setModTab(m) { currentModTab = m; document.getElementById('mod-btn-pri').classList.toggle('active', m === 'pri'); document.getElementById('mod-btn-up').classList.toggle('active', m === 'up'); document.getElementById('mod-sec-pri').classList.toggle('active', m === 'pri'); document.getElementById('mod-sec-up').classList.toggle('active', m === 'up'); }
+    function loadSettingsToUI() { const sv = (id, val) => document.getElementById(id).value = val; sv('pri-m-fa', cfg.pri.max.fa); sv('pri-m-sa', cfg.pri.max.sa); sv('pri-m-wr', cfg.pri.max.wr); sv('pri-m-pr', cfg.pri.max.pr); sv('pri-w-t1', cfg.pri.wt.t1); sv('pri-w-sa', cfg.pri.wt.sa); sv('pri-w-wr', cfg.pri.wt.wr); sv('pri-w-pr', cfg.pri.wt.pr); sv('up-m-fa', cfg.up.max.fa); sv('up-m-sa', cfg.up.max.sa); sv('up-m-wr', cfg.up.max.wr); sv('up-m-pr', cfg.up.max.pr); sv('up-w-t1', cfg.up.wt.t1); sv('up-w-sa', cfg.up.wt.sa); sv('up-w-wr', cfg.up.wt.wr); sv('up-w-pr', cfg.up.wt.pr); }
+    function saveSettings() { const gn = id => Math.max(0, parseFloat(document.getElementById(id).value) || 0); cfg.pri.max = { fa: gn('pri-m-fa'), sa: gn('pri-m-sa'), wr: gn('pri-m-wr'), pr: gn('pri-m-pr') }; cfg.pri.wt = { t1: gn('pri-w-t1'), sa: gn('pri-w-sa'), wr: gn('pri-w-wr'), pr: gn('pri-w-pr') }; cfg.up.max = { fa: gn('up-m-fa'), sa: gn('up-m-sa'), wr: gn('up-m-wr'), pr: gn('up-m-pr') }; cfg.up.wt = { t1: gn('up-w-t1'), sa: gn('up-w-sa'), wr: gn('up-w-wr'), pr: gn('up-w-pr') }; localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg)); if (currentMode !== currentModTab) setMode(currentModTab); else { updateSubLabels(); calculate(); } toggleSettings(); }
+    function toggleTheme() { cfg.theme = document.getElementById('theme-switch').checked ? 'theme-light' : 'theme-dark'; document.body.className = cfg.theme; updateMetaTheme(); localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg)); }
+    function updateMetaTheme() { document.querySelector('meta[name="theme-color"]').setAttribute("content", cfg.theme === 'theme-light' ? "#fafafa" : "#050505"); }
 
-    function toggleSettings() {
-        let modal = document.getElementById('mod-set');
-        if (modal.style.display === 'flex') {
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-        } else {
-            setModTab(currentMode);
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
-        }
-    }
-
-    function saveSettings() {
-        const getNum = id => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
-        
-        cfg.pri.max = { fa: getNum('pri-m-fa'), sa: getNum('pri-m-sa'), wr: getNum('pri-m-wr'), pr: getNum('pri-m-pr') };
-        cfg.pri.wt  = { t1: getNum('pri-w-t1'), sa: getNum('pri-w-sa'), wr: getNum('pri-w-wr'), pr: getNum('pri-w-pr') };
-        
-        cfg.up.max  = { fa: getNum('up-m-fa'), sa: getNum('up-m-sa'), wr: getNum('up-m-wr'), pr: getNum('up-m-pr') };
-        cfg.up.wt   = { t1: getNum('up-w-t1'), sa: getNum('up-w-sa'), wr: getNum('up-w-wr'), pr: getNum('up-w-pr') };
-        
-        localStorage.setItem('assess_calc_pro_v5', JSON.stringify(cfg));
-        
-        // UX UPGRADE: Auto-switch main dashboard to match the settings tab you just edited!
-        if (currentMode !== currentModTab) {
-            setMode(currentModTab);
-        } else {
-            updateSubLabels();
-            revalidateInputs();
-            calculate(); 
-        }
-        
-        toggleSettings();
-    }
-
-    // --- SERVICE WORKER (PWA) ---
+    init();
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker Registered!', reg.scope))
-                .catch(err => console.error('Service Worker Registration Failed!', err));
+                .then(reg => console.log('SW Registered: ', reg.scope))
+                .catch(err => console.log('SW Registration failed: ', err));
         });
     }
-
-    init();
 </script>
 </body>
 </html>
