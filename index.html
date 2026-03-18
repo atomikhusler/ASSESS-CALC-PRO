@@ -213,7 +213,15 @@
         .app-title-wrapper { text-align: center; width: 100%; margin-bottom: 4px; }
         .app-title { font-size: clamp(24px, 6vw, 32px); font-weight: 900; letter-spacing: -0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--text-main) 0%, var(--text-muted) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .pro-badge { font-size: clamp(10px, 3vw, 12px); background: var(--text-main); color: var(--bg-color); padding: 4px 10px; border-radius: 8px; letter-spacing: 1px; text-transform: uppercase; -webkit-text-fill-color: var(--bg-color); }
-        
+                /* --- TOTAL SCORE POP ANIMATION --- */
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-animate {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
     </style>
 </head>
 <body class="theme-dark">
@@ -432,23 +440,25 @@
         let m = cfg[currentMode].max; let w = cfg[currentMode].wt;
 
         let rawSum = fa1 + fa2 + sa1; setTxt('out-rawsum', rawSum);
-        let maxT1 = (m.fa * 2) + m.sa;
-        let t1Score = maxT1 > 0 ? (rawSum / maxT1) * w.t1 : 0; setTxt('out-t1', t1Score.toFixed(1));
+        let maxT1 = (m.fa * 2) + m.sa;        // 1. CALCULATE WEIGHTED SCORES (Rounding UP using Math.ceil)
+        let t1Score = maxT1 > 0 ? Math.ceil((rawSum / maxT1) * w.t1) : 0; 
+        setTxt('out-t1', t1Score);
 
-        let wrScore = m.wr > 0 ? (wr / m.wr) * w.wr : 0; setTxt('out-wr', wrScore.toFixed(1));
-        let prScore = m.pr > 0 ? (pr / m.pr) * w.pr : 0; setTxt('out-pr', prScore.toFixed(1));
-        let sa2Score = m.sa > 0 ? (sa2 / m.sa) * w.sa : 0; setTxt('out-sa2', sa2Score.toFixed(1));
-        let grandTotal = Math.round(t1Score + wrScore + prScore + sa2Score);
-        setTxt('out-final', grandTotal);
-        
-        // 1. ANY data entered? (Wakes up the fluid background & glass panel)
-        let isDataEntered = Object.values(cfg[currentMode].data).some(v => v !== '');
+        let wrScore = m.wr > 0 ? Math.ceil((wr / m.wr) * w.wr) : 0; 
+        setTxt('out-wr', wrScore);
 
-        // 2. ALL data entered? (Wakes up the final score box)
+        let prScore = m.pr > 0 ? Math.ceil((pr / m.pr) * w.pr) : 0; 
+        setTxt('out-pr', prScore);
+
+        let sa2Score = m.sa > 0 ? Math.ceil((sa2 / m.sa) * w.sa) : 0; 
+        setTxt('out-sa2', sa2Score);
+
+        // 2. CHECK COMPLETION STATUS
         const requiredKeys = ['fa1', 'fa2', 'sa1', 'wr', 'pr', 'sa2'];
         let isAllDataEntered = requiredKeys.every(key => cfg[currentMode].data[key] !== undefined && cfg[currentMode].data[key] !== '');
-        
-        // --- PRO FEATURE: Calculate "Live Performance Percentage" ---
+        let isDataEntered = Object.values(cfg[currentMode].data).some(v => v !== '');
+
+        // --- Calculate Live Performance Percentage ---
         let liveScore = 0;
         let liveMax = 0;
         const tally = (id, maxVal) => {
@@ -462,39 +472,49 @@
             }
         };
 
-        tally('inp-fa1', m.fa);
-        tally('inp-fa2', m.fa);
-        tally('inp-sa1', m.sa);
-        tally('inp-wr', m.wr);
-        tally('inp-pr', m.pr);
-        tally('inp-sa2', m.sa);
+        tally('inp-fa1', m.fa); tally('inp-fa2', m.fa); tally('inp-sa1', m.sa);
+        tally('inp-wr', m.wr); tally('inp-pr', m.pr); tally('inp-sa2', m.sa);
         
         let livePercentage = liveMax > 0 ? Math.round((liveScore / liveMax) * 100) : 0;
-
-        // --- TRIGGER FLUID CANVAS ---
-        // Pass isDataEntered so the blobs mix colors instantly!
         let grade = getFluidGrade(livePercentage, isDataEntered);
-        
+
+        // 3. FINAL REVEAL LOGIC & ANIMATION
+        let grandTotal = t1Score + wrScore + prScore + sa2Score; 
         let totalBox = document.getElementById('out-final');
         let remarkBox = document.getElementById('out-remark');
         let panel = document.getElementById('main-panel');
-                
+
         totalBox.style.color = 'var(--text-main)'; 
         remarkBox.style.color = 'var(--text-main)';
-        totalBox.style.textShadow = 'none'; 
-        remarkBox.innerText = grade.r;
-        
-                    // LIVE ELEMENTS: Panel reacts immediately as you type
+        totalBox.style.textShadow = 'none';
+
+        if (isAllDataEntered) {
+            setTxt('out-final', grandTotal);
+            remarkBox.innerText = grade.r;
+            totalBox.style.borderColor = grade.c;
+            totalBox.style.backgroundColor = `${grade.c}1A`;
+            totalBox.style.opacity = "1";
+            
+            if (!totalBox.classList.contains('pop-animate')) {
+                totalBox.classList.remove('pop-animate');
+                void totalBox.offsetWidth;
+                totalBox.classList.add('pop-animate');
+            }
+        } else {
+            setTxt('out-final', '---');
+            remarkBox.innerText = '---';
+            totalBox.style.borderColor = 'var(--text-main)';
+            totalBox.style.backgroundColor = 'var(--input-bg)';
+            totalBox.style.opacity = "0.5"; 
+            totalBox.classList.remove('pop-animate');
+        }
+
+        // 4. LIVE AMBIENT EFFECTS
         panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
         panel.style.boxShadow = isDataEntered ? `0 20px 50px ${grade.c}33, var(--glass-shadow)` : 'var(--glass-shadow)';
         
-        // FLUID BACKGROUND & LIGHT MODE FIX: Inject into body to overpower CSS themes
         document.body.style.setProperty('--blob-1', grade.b1);
         document.body.style.setProperty('--blob-2', grade.b2);
-        
-        // FINAL REVEAL: Final score box stays neutral until all inputs are complete
-        totalBox.style.borderColor = isAllDataEntered ? grade.c : 'var(--text-main)';
-        totalBox.style.backgroundColor = isAllDataEntered ? `${grade.c}1A` : 'var(--input-bg)';
     }
     
     /* Modal / Settings functions remain identical... */
