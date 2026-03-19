@@ -75,10 +75,13 @@
         }
         /* --- THE WATER MIXING BACKGROUND --- */
         .fluid-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; transform: translateZ(0); }
-        .blob {
+                .blob {
             position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.85;
             transition: background-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: transform, background-color; /* Hardware acceleration hint */
+            /* Strict GPU memory allocation to prevent flickering during color shifts */
+            will-change: background-color; 
+            transform: translateZ(0); 
+            backface-visibility: hidden;
         }
         
         /* Smooth, complex pathing using ONLY GPU-friendly transforms */
@@ -219,9 +222,16 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); opacity: 1; }
         }
-        .pop-animate {
+                .pop-animate {
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+
+        /* --- PERFORMANCE & KEYBOARD OPTIMIZATIONS --- */
+        .glass-panel, .blob { transform: translateZ(0); will-change: transform; }
+        
+        body.typing-active .blob { animation-play-state: paused !important; }
+        
+        body.typing-active { padding-bottom: 50vh; justify-content: flex-start; padding-top: 20px; }
     </style>
 </head>
 <body class="theme-dark">
@@ -316,7 +326,7 @@
     let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v7')) || DEFAULT_CONFIG;
     if (!cfg.pri.data) cfg.pri.data = {}; if (!cfg.up.data) cfg.up.data = {};
 
-    function init() {
+        function init() {
         document.body.className = cfg.theme;
         document.getElementById('theme-switch').checked = (cfg.theme === 'theme-light');
         updateMetaTheme(); loadSettingsToUI(); updateSubLabels(); 
@@ -327,12 +337,22 @@
                 let key = inp.id.replace('inp-', '');
                 inp.value = cfg[currentMode].data[key] || '';
                 inp.addEventListener('input', handleInput);
-                inp.addEventListener('focus', function() { if(this.value === '0') this.value = ''; });
+                
+                // --- LAG FIX: Pause animations on focus ---
+                inp.addEventListener('focus', function() { 
+                    if(this.value === '0') this.value = ''; 
+                    document.body.classList.add('typing-active'); 
+                });
+                
+                // --- LAG FIX: Resume animations on blur ---
+                inp.addEventListener('blur', function() {
+                    document.body.classList.remove('typing-active'); 
+                });
             }
         });
         calculate(); // Run initial fluid state
     }
-
+    
     function updateSubLabels() { /* Details omitted for brevity, logic remains identical */
         let m = cfg[currentMode].max; let w = cfg[currentMode].wt;
         document.querySelectorAll('.lbl-max-fa').forEach(el => el.innerText = `MAX: ${m.fa}`);
@@ -345,20 +365,32 @@
         document.getElementById('lbl-wt-pr').innerText = `WT: ${w.pr}%`;
         document.getElementById('lbl-wt-sa').innerText = `WT: ${w.sa}%`;
     }
-
     function handleInput(e) {
-        let el = e.target; let type = el.getAttribute('data-max');        let maxLimit = cfg[currentMode].max[type]; 
+        let el = e.target; 
+        let type = el.getAttribute('data-max');        
+        let maxLimit = cfg[currentMode].max[type]; 
         let val = parseFloat(el.value);
+        
         if (!isNaN(val)) {
-            if (val < 0) { el.value = 0; } // NEW: Prevent negative marks
+            if (val < 0) { el.value = 0; } 
             else if (val > maxLimit) { 
                 el.value = maxLimit; 
                 el.classList.add('error'); 
                 setTimeout(() => el.classList.remove('error'), 300); 
             }
+            
+            // --- ELITE AUTO-MOVE LOGIC ---
+            if (val !== 0 && (val * 10) > maxLimit) {
+                let inputs = Array.from(document.querySelectorAll('input[id^="inp-"]'));
+                let currentIndex = inputs.indexOf(el);
+                if (currentIndex > -1 && currentIndex < inputs.length - 1) {
+                    let nextInput = inputs[currentIndex + 1];
+                    nextInput.focus();
+                }
+            }
         }
         
-                // PRO MEMORY: Save as user types
+        // PRO MEMORY: Save as user types
         let key = el.id.replace('inp-', '');
         cfg[currentMode].data[key] = el.value; 
         localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg));
@@ -367,7 +399,7 @@
         // --- TRIGGER RIPPLE ---
         triggerRipple(el);
     }
-
+    
     function triggerRipple(element) {
         const system = document.getElementById('ripple-system');
         const rect = element.getBoundingClientRect();
@@ -508,13 +540,18 @@
             totalBox.style.opacity = "0.5"; 
             totalBox.classList.remove('pop-animate');
         }
-
-        // 4. LIVE AMBIENT EFFECTS
-        panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
-        panel.style.boxShadow = isDataEntered ? `0 20px 50px ${grade.c}33, var(--glass-shadow)` : 'var(--glass-shadow)';
         
-        document.body.style.setProperty('--blob-1', grade.b1);
-        document.body.style.setProperty('--blob-2', grade.b2);
+        // 4. PRO RENDER PIPELINE
+        if (window.renderFrame) cancelAnimationFrame(window.renderFrame);
+        
+        // Syncs the heavy color math perfectly with the device's GPU refresh rate
+        window.renderFrame = requestAnimationFrame(() => {
+            panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
+            panel.style.boxShadow = isDataEntered ? `0 20px 50px ${grade.c}33, var(--glass-shadow)` : 'var(--glass-shadow)';
+            
+            document.body.style.setProperty('--blob-1', grade.b1);
+            document.body.style.setProperty('--blob-2', grade.b2);
+        });
     }
     
     /* Modal / Settings functions remain identical... */

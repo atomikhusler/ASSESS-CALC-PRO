@@ -10,18 +10,21 @@ self.addEventListener('install', e => {
     e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
 });
 
-self.addEventListener('activate', e => {
-    e.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(keys.map(key => {
-                if (key !== CACHE_NAME) {
-                    console.log('Destroying old cache:', key);
-                    return caches.delete(key);
-                }
-            }));
+// 🔥 STALE-WHILE-REVALIDATE STRATEGY 🔥
+self.addEventListener('fetch', e => {
+    e.respondWith(
+        caches.match(e.request).then(cachedResponse => {
+            const fetchPromise = fetch(e.request).then(networkResponse => {
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(e.request, networkResponse.clone());
+                });
+                return networkResponse;
+            }).catch(() => {
+                console.log('Offline mode active.');
+            });
+            return cachedResponse || fetchPromise;
         })
     );
-    self.clients.claim();
 });
 
 // 🔥 THE NETWORK-FIRST STRATEGY 🔥
