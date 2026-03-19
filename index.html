@@ -66,7 +66,7 @@
             --blob-2: rgba(14, 165, 233, 0.65);
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }         input { -webkit-user-select: auto; user-select: auto; }
         
         body { 
             background-color: var(--bg-color); color: var(--text-main); 
@@ -75,16 +75,12 @@
         }
         /* --- THE WATER MIXING BACKGROUND --- */
         .fluid-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; transform: translateZ(0); }
-                .blob {
-            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.85;
-            transition: background-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Strict GPU memory allocation to prevent flickering during color shifts */
-            will-change: background-color; 
-            transform: translateZ(0); 
-            backface-visibility: hidden;
+                /* --- OPACITY-WAVE ENGINE (0-Lag Mediatek Fix) --- */
+        .blob {
+            position: absolute; border-radius: 50%; opacity: 0.8;
+            will-change: transform; transform: translateZ(0); backface-visibility: hidden;
         }
         
-        /* Smooth, complex pathing using ONLY GPU-friendly transforms */
         @keyframes floatLiquid1 {
             0% { transform: translate(0, 0) scale(1) rotate(0deg); }
             33% { transform: translate(5vw, 5vh) scale(1.1) rotate(5deg); }
@@ -97,16 +93,27 @@
             66% { transform: translate(4vw, -7vh) scale(0.9) rotate(3deg); }
             100% { transform: translate(0, 0) scale(1) rotate(0deg); }
         }
+        
         .blob-1 { 
-            top: -15%; left: -15%; width: 130vw; height: 100vw; 
-            background-color: var(--blob-1); 
+            top: -20%; left: -20%; width: 140vw; height: 140vw; 
+            background: radial-gradient(circle, var(--blob-1) 0%, transparent 70%); 
             animation: floatLiquid1 22s ease-in-out infinite;
         }
         .blob-2 { 
-            bottom: -15%; right: -15%; width: 130vw; height: 100vw; 
-            background-color: var(--blob-2); 
+            bottom: -20%; right: -20%; width: 140vw; height: 140vw; 
+            background: radial-gradient(circle, var(--blob-2) 0%, transparent 70%); 
             animation: floatLiquid2 26s ease-in-out infinite;
-        }        
+        }
+
+        /* --- PRO TOAST NOTIFICATION --- */
+        .pro-toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--text-main); color: var(--bg-color);
+            padding: 12px 24px; border-radius: 20px; font-size: 13px; font-weight: 800; text-transform: uppercase;
+            opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .pro-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         
         /* --- ELITE RIPPLE SYSTEM 🌊 --- */
         .ripple-container {
@@ -230,8 +237,12 @@
         .glass-panel, .blob { transform: translateZ(0); will-change: transform; }
         
         body.typing-active .blob { animation-play-state: paused !important; }
-        
-        body.typing-active { padding-bottom: 50vh; justify-content: flex-start; padding-top: 20px; }
+         body.typing-active { 
+    padding-bottom: 20px; 
+    justify-content: flex-start; 
+    padding-top: 10px;
+           
+         }
     </style>
 </head>
 <body class="theme-dark">
@@ -293,11 +304,19 @@
 
 <div class="modal" id="mod-set">
     <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
-        <h2>Configuration</h2>
-        <div class="theme-toggle-row">
-            <span style="font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Light Mode</span>
-            <label class="switch"><input type="checkbox" id="theme-switch" onchange="toggleTheme()"> <span class="slider"></span></label>
+                <h2>Configuration</h2>
+        <div class="theme-toggle-row" style="border-bottom: none; padding-bottom: 0; margin-bottom: 16px;">
+            <span style="font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Appearance</span>
+            <div style="display: flex; gap: 4px; background: var(--input-bg); padding: 4px; border-radius: 12px; border: 1px solid var(--glass-border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                <button id="btn-theme-light" onclick="setTheme('theme-light')" style="background: transparent; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s;">☀️</button>
+                <button id="btn-theme-dark" onclick="setTheme('theme-dark')" style="background: transparent; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.3s;">🌙</button>
+            </div>
         </div>
+        <div class="theme-toggle-row">
+            <span style="font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Enable Dev Logs</span>
+            <input type="checkbox" id="log-switch" onchange="toggleLogs()" style="width: 20px; height: 20px; accent-color: var(--text-main);">
+        </div>
+        
         <div class="toggle-group" style="margin: 0 auto 20px auto; justify-content: center;">
             <button id="mod-btn-pri" class="active" onclick="setModTab('pri')">Primary</button>
             <button id="mod-btn-up" onclick="setModTab('up')">U.Primary</button>
@@ -315,22 +334,23 @@
     </div>
 </div>
 
-<script>
-    let currentMode = 'pri'; let currentModTab = 'pri';
+<script>    let currentMode = 'pri'; let currentModTab = 'pri';
     const DEFAULT_CONFIG = {
-        theme: 'theme-dark',
+        theme: 'theme-light', 
+        devLogs: false,      
         pri: { max: { fa: 25, sa: 50, wr: 10, pr: 20 }, wt: { t1: 30, sa: 40, wr: 10, pr: 20 }, data: {} },
         up: { max: { fa: 25, sa: 50, wr: 5, pr: 15 }, wt: { t1: 30, sa: 50, wr: 5, pr: 15 }, data: {} }
     };
     
     let cfg = JSON.parse(localStorage.getItem('assess_calc_pro_v7')) || DEFAULT_CONFIG;
     if (!cfg.pri.data) cfg.pri.data = {}; if (!cfg.up.data) cfg.up.data = {};
-
-        function init() {
+    
+            function init() {
         document.body.className = cfg.theme;
-        document.getElementById('theme-switch').checked = (cfg.theme === 'theme-light');
+        setTheme(cfg.theme); // Syncs icons visually
+        let logSw = document.getElementById('log-switch'); if(logSw) logSw.checked = !!cfg.devLogs;
         updateMetaTheme(); loadSettingsToUI(); updateSubLabels(); 
-
+        
         document.querySelectorAll('input[type="number"]').forEach(inp => {
             if(inp.id.startsWith('inp-')) {
                 // PRO MEMORY: Load saved inputs on boot
@@ -364,42 +384,48 @@
         document.getElementById('lbl-wt-wr').innerText = `WT: ${w.wr}%`;
         document.getElementById('lbl-wt-pr').innerText = `WT: ${w.pr}%`;
         document.getElementById('lbl-wt-sa').innerText = `WT: ${w.sa}%`;
+      
     }
-    function handleInput(e) {
+            function handleInput(e) {
         let el = e.target; 
         let type = el.getAttribute('data-max');        
         let maxLimit = cfg[currentMode].max[type]; 
         let val = parseFloat(el.value);
         
         if (!isNaN(val)) {
-            if (val < 0) { el.value = 0; } 
+            if (val < 0) { 
+                el.value = ''; 
+            } 
             else if (val > maxLimit) { 
-                el.value = maxLimit; 
+                // --- GATEKEEPER LOGIC ---
+                // Wipes the box clean, shakes red, and keeps focus locked here
+                el.value = ''; 
                 el.classList.add('error'); 
-                setTimeout(() => el.classList.remove('error'), 300); 
-            }
-            
-            // --- ELITE AUTO-MOVE LOGIC ---
-            if (val !== 0 && (val * 10) > maxLimit) {
-                let inputs = Array.from(document.querySelectorAll('input[id^="inp-"]'));
-                let currentIndex = inputs.indexOf(el);
-                if (currentIndex > -1 && currentIndex < inputs.length - 1) {
-                    let nextInput = inputs[currentIndex + 1];
-                    nextInput.focus();
+                setTimeout(() => el.classList.remove('error'), 300);
+                el.focus();
+            } 
+            else {
+                // --- CONDITIONAL AUTO-MOVE ---
+                // Only jumps if the input is completely valid and logically finished
+                if (val !== 0 && (val * 10) > maxLimit) {
+                    let inputs = Array.from(document.querySelectorAll('input[id^="inp-"]'));
+                    let currentIndex = inputs.indexOf(el);
+                    if (currentIndex > -1 && currentIndex < inputs.length - 1) {
+                        inputs[currentIndex + 1].focus();
+                    }
                 }
             }
         }
         
-        // PRO MEMORY: Save as user types
+        // Save the typed number to memory
         let key = el.id.replace('inp-', '');
         cfg[currentMode].data[key] = el.value; 
         localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg));
-        calculate();
         
-        // --- TRIGGER RIPPLE ---
+        calculate();
         triggerRipple(el);
-    }
-    
+              
+            }
     function triggerRipple(element) {
         const system = document.getElementById('ripple-system');
         const rect = element.getBoundingClientRect();
@@ -437,13 +463,64 @@
         });
         updateSubLabels(); calculate(); 
     }
-
-    function clearAll() {
+        // --- PRO HARD RESET ENGINE ---
+    function normalClear() {
         document.querySelectorAll('input[id^="inp-"]').forEach(inp => inp.value = '');
-        cfg.pri.data = {}; cfg.up.data = {}; // Wipes memory for both modes
+        cfg.pri.data = {}; cfg.up.data = {}; 
         localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg));
-        calculate(); document.getElementById('inp-fa1').focus();
+        calculate();
     }
+
+    function hardReset() {
+        localStorage.removeItem('assess_calc_pro_v7');
+        localStorage.removeItem('app_version_tracker');
+        if ('caches' in window) { caches.keys().then(names => names.forEach(n => caches.delete(n))); }
+        window.location.reload(true);
+    }
+
+    function showToast(msg) {
+        let t = document.getElementById('pro-toast');
+        if(!t) { t = document.createElement('div'); t.id = 'pro-toast'; t.className = 'pro-toast'; document.body.appendChild(t); }
+        t.innerText = msg; t.classList.add('show');
+        clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    // Bind Advanced Listeners to Clear Button
+    setTimeout(() => {
+        const btn = document.querySelector('.btn-clear');
+        if(!btn) return;
+        btn.removeAttribute('onclick'); // Take over from basic HTML
+        
+        let taps = 0, tapTimer, holdTimer, isHolding = false;
+
+        btn.addEventListener('pointerdown', () => { 
+            isHolding = false; 
+            holdTimer = setTimeout(() => { isHolding = true; hardReset(); }, 1500); 
+        });
+        
+        btn.addEventListener('pointerup', () => { 
+            clearTimeout(holdTimer); 
+            if (isHolding) return; 
+            
+            taps++; clearTimeout(tapTimer);
+            if (taps === 1) { 
+                normalClear(); tapTimer = setTimeout(() => taps = 0, 500); 
+            } 
+            else if (taps === 2) { 
+                showToast("Hold for 1s to Reset"); tapTimer = setTimeout(() => taps = 0, 500); 
+            } 
+            else if (taps >= 4) { 
+                hardReset(); 
+            } 
+            else { 
+                tapTimer = setTimeout(() => taps = 0, 500); 
+            }
+        });
+        
+        btn.addEventListener('pointercancel', () => clearTimeout(holdTimer));
+        btn.addEventListener('contextmenu', e => e.preventDefault()); // Stop Android long-press menu
+    }, 100);
     
  // --- FLUID CANVAS LOGIC ---
     function getFluidGrade(score, isDataEntered) {
@@ -541,27 +618,61 @@
             totalBox.classList.remove('pop-animate');
         }
         
-        // 4. PRO RENDER PIPELINE
-        if (window.renderFrame) cancelAnimationFrame(window.renderFrame);
+                // 4. DEBOUNCED RENDER PIPELINE (Fixes Mediatek Blinking/Crashing)
+        clearTimeout(window.colorTimer);
         
-        // Syncs the heavy color math perfectly with the device's GPU refresh rate
-        window.renderFrame = requestAnimationFrame(() => {
-            panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
-            panel.style.boxShadow = isDataEntered ? `0 20px 50px ${grade.c}33, var(--glass-shadow)` : 'var(--glass-shadow)';
-            
-            document.body.style.setProperty('--blob-1', grade.b1);
-            document.body.style.setProperty('--blob-2', grade.b2);
-        });
+        // Waits 150ms after typing stops before calculating heavy background blurs
+        window.colorTimer = setTimeout(() => {
+            if (window.renderFrame) cancelAnimationFrame(window.renderFrame);
+            window.renderFrame = requestAnimationFrame(() => {
+                panel.style.borderColor = isDataEntered ? grade.c : 'var(--glass-border)';
+                panel.style.boxShadow = isDataEntered ? `0 20px 50px ${grade.c}33, var(--glass-shadow)` : 'var(--glass-shadow)';
+                
+                document.body.style.setProperty('--blob-1', grade.b1);
+                document.body.style.setProperty('--blob-2', grade.b2);
+            });
+        }, 150);
     }
     
     /* Modal / Settings functions remain identical... */
     function toggleSettings() { let m = document.getElementById('mod-set'); if (m.style.display === 'flex') { m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); } else { setModTab(currentMode); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10); } }
     function setModTab(m) { currentModTab = m; document.getElementById('mod-btn-pri').classList.toggle('active', m === 'pri'); document.getElementById('mod-btn-up').classList.toggle('active', m === 'up'); document.getElementById('mod-sec-pri').classList.toggle('active', m === 'pri'); document.getElementById('mod-sec-up').classList.toggle('active', m === 'up'); }
     function loadSettingsToUI() { const sv = (id, val) => document.getElementById(id).value = val; sv('pri-m-fa', cfg.pri.max.fa); sv('pri-m-sa', cfg.pri.max.sa); sv('pri-m-wr', cfg.pri.max.wr); sv('pri-m-pr', cfg.pri.max.pr); sv('pri-w-t1', cfg.pri.wt.t1); sv('pri-w-sa', cfg.pri.wt.sa); sv('pri-w-wr', cfg.pri.wt.wr); sv('pri-w-pr', cfg.pri.wt.pr); sv('up-m-fa', cfg.up.max.fa); sv('up-m-sa', cfg.up.max.sa); sv('up-m-wr', cfg.up.max.wr); sv('up-m-pr', cfg.up.max.pr); sv('up-w-t1', cfg.up.wt.t1); sv('up-w-sa', cfg.up.wt.sa); sv('up-w-wr', cfg.up.wt.wr); sv('up-w-pr', cfg.up.wt.pr); }
-    function saveSettings() { const gn = id => Math.max(0, parseFloat(document.getElementById(id).value) || 0); cfg.pri.max = { fa: gn('pri-m-fa'), sa: gn('pri-m-sa'), wr: gn('pri-m-wr'), pr: gn('pri-m-pr') }; cfg.pri.wt = { t1: gn('pri-w-t1'), sa: gn('pri-w-sa'), wr: gn('pri-w-wr'), pr: gn('pri-w-pr') }; cfg.up.max = { fa: gn('up-m-fa'), sa: gn('up-m-sa'), wr: gn('up-m-wr'), pr: gn('up-m-pr') }; cfg.up.wt = { t1: gn('up-w-t1'), sa: gn('up-w-sa'), wr: gn('up-w-wr'), pr: gn('up-w-pr') }; localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg)); if (currentMode !== currentModTab) setMode(currentModTab); else { updateSubLabels(); calculate(); } toggleSettings(); }
-    function toggleTheme() { cfg.theme = document.getElementById('theme-switch').checked ? 'theme-light' : 'theme-dark'; document.body.className = cfg.theme; updateMetaTheme(); localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg)); }
-    function updateMetaTheme() { document.querySelector('meta[name="theme-color"]').setAttribute("content", cfg.theme === 'theme-light' ? "#fafafa" : "#050505"); }
-
+        function saveSettings() { const gn = id => Math.max(0, parseFloat(document.getElementById(id).value) || 0); cfg.pri.max = { fa: gn('pri-m-fa'), sa: gn('pri-m-sa'), wr: gn('pri-m-wr'), pr: gn('pri-m-pr') }; cfg.pri.wt = { t1: gn('pri-w-t1'), sa: gn('pri-w-sa'), wr: gn('pri-w-wr'), pr: gn('pri-w-pr') }; cfg.up.max = { fa: gn('up-m-fa'), sa: gn('up-m-sa'), wr: gn('up-m-wr'), pr: gn('up-m-pr') }; cfg.up.wt = { t1: gn('up-w-t1'), sa: gn('up-w-sa'), wr: gn('up-w-wr'), pr: gn('up-w-pr') }; localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg)); if (currentMode !== currentModTab) setMode(currentModTab); else { updateSubLabels(); calculate(); } toggleSettings(); }
+    
+    // --- ELITE THEME & ANDROID SYNC ENGINE ---
+    function setTheme(t) { 
+        cfg.theme = t; document.body.className = t; 
+        let isL = t === 'theme-light';
+        let bL = document.getElementById('btn-theme-light'), bD = document.getElementById('btn-theme-dark');
+        bL.style.background = isL ? 'var(--text-main)' : 'transparent'; bL.style.opacity = isL ? '1' : '0.5';
+        bD.style.background = !isL ? 'var(--text-main)' : 'transparent'; bD.style.opacity = !isL ? '1' : '0.5';
+        updateMetaTheme(); localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg)); 
+    }
+    function toggleLogs() { cfg.devLogs = document.getElementById('log-switch').checked; localStorage.setItem('assess_calc_pro_v7', JSON.stringify(cfg)); }
+    function updateMetaTheme() { document.querySelector('meta[name="theme-color"]').setAttribute("content", cfg.theme === 'theme-light' ? "#e2e8f0" : "#050505"); }
+    
+        // --- 5-TAP DEV LOG DOWNLOADER ---
+    let brandTaps = 0, brandTimer;
+    let brandEl = document.querySelector('.app-title-wrapper');
+    if(brandEl) {
+        brandEl.addEventListener('pointerup', () => {
+            if (!cfg.devLogs) return; // Does nothing if logs aren't checked in settings
+            brandTaps++; 
+            clearTimeout(brandTimer);
+            
+            if (brandTaps >= 5) {
+                brandTaps = 0;
+                const logData = { timestamp: new Date().toISOString(), userAgent: navigator.userAgent, config: cfg };
+                const blob = new Blob([JSON.stringify(logData, null, 2)], { type: "application/json" });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+                a.download = `assess-log-v7.json`; a.click();
+                showToast("Dev Log Saved"); 
+            } else {
+                brandTimer = setTimeout(() => brandTaps = 0, 800);
+            }
+        });
+    }
     init();
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
